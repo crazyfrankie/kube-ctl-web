@@ -1,15 +1,19 @@
 <template>
   <div class="app-container">
+    <div class="detail-header">
+      <el-page-header @back="goBack" :content="isEdit ? 'Edit Pod' : 'Create Pod'" />
+    </div>
+
     <el-form ref="form" :model="podForm" label-width="120px">
       <el-card class="box-card">
         <div slot="header" class="clearfix">
-          <span>基本信息</span>
+          <span>Basic Information</span>
         </div>
-        <el-form-item label="名称" prop="base.name">
+        <el-form-item label="Name" prop="base.name">
           <el-input v-model="podForm.base.name" :disabled="isEdit" />
         </el-form-item>
-        <el-form-item label="命名空间" prop="base.namespace">
-          <el-select v-model="podForm.base.namespace" placeholder="请选择命名空间" :disabled="isEdit">
+        <el-form-item label="Namespace" prop="base.namespace">
+          <el-select v-model="podForm.base.namespace" placeholder="Select namespace" :disabled="isEdit">
             <el-option
               v-for="item in namespaces"
               :key="item.name"
@@ -18,82 +22,82 @@
             />
           </el-select>
         </el-form-item>
-        <el-form-item label="重启策略" prop="base.restartPolicy">
+        <el-form-item label="Restart Policy" prop="base.restartPolicy">
           <el-select v-model="podForm.base.restartPolicy">
             <el-option label="Always" value="Always" />
             <el-option label="Never" value="Never" />
             <el-option label="On-Failure" value="On-Failure" />
           </el-select>
         </el-form-item>
-        <el-form-item label="标签">
-          <el-button size="small" type="primary" @click="addLabel('base')">添加标签</el-button>
+        <el-form-item label="Labels">
+          <el-button size="small" type="primary" @click="addLabel('base')">Add Label</el-button>
           <div v-for="(label, index) in podForm.base.labels" :key="index" style="margin-top: 10px">
-            <el-input v-model="label.key" placeholder="键" style="width: 200px" />
-            <el-input v-model="label.value" placeholder="值" style="width: 200px; margin: 0 10px" />
-            <el-button type="danger" size="small" @click="removeLabel('base', index)">删除</el-button>
+            <el-input v-model="label.key" placeholder="Key" style="width: 200px" />
+            <el-input v-model="label.value" placeholder="Value" style="width: 200px; margin: 0 10px" />
+            <el-button type="danger" size="small" @click="removeLabel('base', index)">Delete</el-button>
           </div>
         </el-form-item>
       </el-card>
 
       <el-card class="box-card" style="margin-top: 20px">
         <div slot="header" class="clearfix">
-          <span>网络配置</span>
+          <span>Network Configuration</span>
         </div>
-        <el-form-item label="主机名" prop="network.hostName">
+        <el-form-item label="Hostname" prop="network.hostName">
           <el-input v-model="podForm.network.hostName" />
         </el-form-item>
-        <el-form-item label="使用主机网络">
+        <el-form-item label="Use Host Network">
           <el-switch v-model="podForm.network.hostNetwork" />
         </el-form-item>
-        <el-form-item label="DNS策略" prop="network.dnsPolicy">
+        <el-form-item label="DNS Policy" prop="network.dnsPolicy">
           <el-select v-model="podForm.network.dnsPolicy">
             <el-option label="ClusterFirst" value="ClusterFirst" />
             <el-option label="None" value="None" />
             <el-option label="Default" value="Default" />
           </el-select>
         </el-form-item>
-        <el-form-item label="DNS服务器">
-          <el-button size="small" type="primary" @click="addDNSServer">添加DNS服务器</el-button>
+        <el-form-item label="DNS Servers">
+          <el-button size="small" type="primary" @click="addDNSServer">Add DNS Server</el-button>
           <div v-for="(server, index) in podForm.network.dnsConfig.nameservers" :key="index" style="margin-top: 10px">
             <el-input v-model="podForm.network.dnsConfig.nameservers[index]" style="width: 200px" />
-            <el-button type="danger" size="small" @click="removeDNSServer(index)">删除</el-button>
+            <el-button type="danger" size="small" @click="removeDNSServer(index)">Delete</el-button>
           </div>
         </el-form-item>
-        <el-form-item label="主机别名">
-          <el-button size="small" type="primary" @click="addHostAlias">添加主机别名</el-button>
+        <el-form-item label="Host Aliases">
+          <el-button size="small" type="primary" @click="addHostAlias">Add Host Alias</el-button>
           <div v-for="(alias, index) in podForm.network.hostAliases" :key="index" style="margin-top: 10px">
             <el-input v-model="alias.key" placeholder="IP" style="width: 200px" />
-            <el-input v-model="alias.value" placeholder="主机名" style="width: 200px; margin: 0 10px" />
-            <el-button type="danger" size="small" @click="removeHostAlias(index)">删除</el-button>
+            <el-input v-model="alias.value" placeholder="Hostname" style="width: 200px; margin: 0 10px" />
+            <el-button type="danger" size="small" @click="removeHostAlias(index)">Delete</el-button>
           </div>
         </el-form-item>
       </el-card>
 
       <el-card class="box-card" style="margin-top: 20px">
         <div slot="header" class="clearfix">
-          <span>存储卷</span>
-          <el-button style="float: right" type="primary" size="small" @click="addVolume">添加存储卷</el-button>
+          <span>Volumes</span>
+          <el-button style="float: right" type="primary" size="small" @click="addVolume">Add Volume</el-button>
         </div>
         <div v-for="(vol, index) in podForm.volume" :key="index" class="volume-item">
-          <el-form-item :label="'存储卷 ' + (index + 1)">
-            <el-input v-model="vol.name" placeholder="名称" style="width: 200px" />
-            <el-select v-model="vol.type" placeholder="类型" style="width: 200px; margin: 0 10px">
+          <el-form-item :label="'Volume ' + (index + 1)">
+            <el-input v-model="vol.name" placeholder="Name" style="width: 200px" />
+            <el-select v-model="vol.type" placeholder="Type" style="width: 200px; margin: 0 10px">
               <el-option label="emptyDir" value="emptyDir" />
               <el-option label="hostPath" value="hostPath" />
               <el-option label="configMap" value="configMap" />
             </el-select>
-            <el-button type="danger" size="small" @click="removeVolume(index)">删除</el-button>
+            <el-button type="danger" size="small" @click="removeVolume(index)">Delete</el-button>
           </el-form-item>
         </div>
       </el-card>
 
       <el-card class="box-card" style="margin-top: 20px">
         <div slot="header" class="clearfix">
-          <span>容器配置</span>
+          <span>Container Configuration</span>
         </div>
         <div class="container-section">
-          <h4>初始化容器</h4>
-          <el-button type="primary" size="small" @click="addContainer('init')">添加初始化容器</el-button>
+          <h4>Init Containers</h4>
+          <el-button type="primary" size="small" @click="addContainer('init')">Add Init Container</el-button>
           <container-form
             v-for="(container, index) in podForm.initContainers"
             :key="'init-' + index"
@@ -102,8 +106,8 @@
           />
         </div>
         <div class="container-section" style="margin-top: 20px">
-          <h4>主容器</h4>
-          <el-button type="primary" size="small" @click="addContainer('main')">添加主容器</el-button>
+          <h4>Main Containers</h4>
+          <el-button type="primary" size="small" @click="addContainer('main')">Add Main Container</el-button>
           <container-form
             v-for="(container, index) in podForm.containers"
             :key="'main-' + index"
@@ -113,9 +117,8 @@
         </div>
       </el-card>
 
-      <div style="margin-top: 20px; text-align: center;">
-        <el-button type="primary" @click="submitForm">提交</el-button>
-        <el-button @click="goBack">返回</el-button>
+      <div style="margin-top: 20px; text-align: right;">
+        <el-button type="primary" @click="submitForm">Submit</el-button>
       </div>
     </el-form>
   </div>
@@ -150,9 +153,9 @@ export default {
           },
           hostAliases: []
         },
-        volume: [],
         initContainers: [],
-        containers: []
+        containers: [],
+        volume: []
       }
     }
   },
@@ -162,11 +165,10 @@ export default {
     })
   },
   created() {
-    this.getNamespaces()
-    this.initForm()
+    this.init()
   },
   methods: {
-    async getNamespaces() {
+    async initNamespace() {
       try {
         await this.$store.dispatch('pod/getNamespaces')
         if (this.$route.query.namespace) {
@@ -175,19 +177,137 @@ export default {
           this.podForm.base.namespace = this.namespaces[0].name
         }
       } catch (error) {
-        Message.error('获取命名空间列表失败')
+        Message.error('Failed to fetch namespace list')
       }
     },
-    async initForm() {
-      const { name, namespace, isEdit } = this.$route.query
-      this.isEdit = isEdit === 'true'
+    async init() {
+      const { namespace, name, edit } = this.$route.query
+      this.isEdit = edit === 'true'
+
+      await this.initNamespace()
 
       if (this.isEdit && name && namespace) {
+        this.loading = true
         try {
           const response = await this.$store.dispatch('pod/getPodDetail', { name, namespace })
-          this.podForm = response.data
+          const podData = response.data
+          this.podForm = {
+            base: {
+              name: podData.base?.name || '',
+              namespace: podData.base?.namespace || namespace,
+              restartPolicy: podData.base?.restartPolicy || 'Always',
+              labels: Array.isArray(podData.base?.labels) ? [...podData.base.labels] : []
+            },
+            network: {
+              hostName: podData.network?.hostName || '',
+              hostNetwork: podData.network?.hostNetwork || false,
+              dnsPolicy: podData.network?.dnsPolicy || 'ClusterFirst',
+              dnsConfig: {
+                nameservers: Array.isArray(podData.network?.dnsConfig?.nameservers) 
+                  ? [...podData.network.dnsConfig.nameservers]
+                  : []
+              },
+              hostAliases: Array.isArray(podData.network?.hostAliases)
+                ? [...podData.network.hostAliases]
+                : []
+            },
+            initContainers: Array.isArray(podData.initContainers)
+              ? podData.initContainers.map(container => this.mapContainerData(container))
+              : [],
+            containers: Array.isArray(podData.containers)
+              ? podData.containers.map(container => this.mapContainerData(container))
+              : [],
+            volume: Array.isArray(podData.volume)
+              ? [...podData.volume]
+              : []
+          }
         } catch (error) {
-          Message.error('获取Pod详情失败')
+          console.error('Error fetching Pod details:', error)
+          this.$message.error('Failed to fetch Pod details')
+        } finally {
+          this.loading = false
+        }
+      }
+    },
+    mapContainerData(container) {
+      return {
+        name: container.name || '',
+        image: container.image || '',
+        imagePullPolicy: container.imagePullPolicy || 'IfNotPresent',
+        workingDir: container.workingDir || '',
+        privileged: container.privileged || false,
+        tty: container.tty || false,
+        command: Array.isArray(container.command) ? container.command : [],
+        args: Array.isArray(container.args) ? container.args : [],
+        ports: Array.isArray(container.ports) 
+          ? container.ports.map(port => ({
+              name: port.name || '',
+              containerPort: port.containerPort,
+              hostPort: port.hostPort
+            }))
+          : [],
+        env: Array.isArray(container.env) 
+          ? container.env.map(env => ({
+              key: env.key || '',
+              value: env.value || ''
+            }))
+          : [],
+        volumeMounts: Array.isArray(container.volumeMounts)
+          ? container.volumeMounts.map(mount => ({
+              mountName: mount.mountName || '',
+              mountPath: mount.mountPath || '',
+              readOnly: mount.readOnly || false
+            }))
+          : [],
+        resources: container.resources || {
+          enable: false,
+          CPUReq: 100,
+          CPULimit: 200,
+          memory: 128,
+          memoryLimit: 256
+        },
+        livenessProbe: this.mapProbeData(container.livenessProbe),
+        readyProbe: this.mapProbeData(container.readyProbe),
+        startUpProbe: this.mapProbeData(container.startUpProbe)
+      }
+    },
+    mapProbeData(probe) {
+      if (!probe) return null
+      
+      // 如果是编辑模式下的已有探针
+      const probeType = probe.exec ? 'exec'
+        : probe.httpGet ? 'httpGet'
+        : probe.tcpSocket ? 'tcpSocket'
+        : 'exec'
+
+      return {
+        enable: true, // 如果探针存在，说明是启用的
+        type: probeType,
+        initialDelaySeconds: probe.initialDelaySeconds || 0,
+        periodSeconds: probe.periodSeconds || 10,
+        timeoutSeconds: probe.timeoutSeconds || 1,
+        successThreshold: probe.successThreshold || 1,
+        failureThreshold: probe.failureThreshold || 3,
+        exec: probe.exec ? {
+          command: Array.isArray(probe.exec.command) ? [...probe.exec.command] : []
+        } : { command: [] },
+        httpGet: probe.httpGet ? {
+          path: probe.httpGet.path || '/',
+          port: probe.httpGet.port || 80,
+          scheme: probe.httpGet.scheme || 'HTTP',
+          headers: Array.isArray(probe.httpGet.headers) ? [...probe.httpGet.headers] : []
+        } : {
+          path: '/',
+          port: 80,
+          scheme: 'HTTP',
+          headers: []
+        },
+        tcpSocket: probe.tcpSocket ? {
+          port: probe.tcpSocket.port || 80,
+          host: probe.tcpSocket.host || ''
+        } : {
+          port: 80,
+          host: ''
         }
       }
     },
@@ -247,14 +367,17 @@ export default {
     async submitForm() {
       try {
         await this.$store.dispatch('pod/createPod', this.podForm)
-        Message.success(this.isEdit ? '更新成功' : '创建成功')
+        Message.success(this.isEdit ? 'Update successful' : 'Creation successful')
         this.goBack()
       } catch (error) {
-        Message.error(this.isEdit ? '更新失败' : '创建失败')
+        Message.error(this.isEdit ? 'Update failed' : 'Creation failed')
       }
     },
     goBack() {
-      this.$router.push('/pod/list')
+      this.$router.push({
+        path: '/pod/list',
+        query: { namespace: this.podForm.base.namespace }
+      })
     }
   }
 }
@@ -272,5 +395,8 @@ export default {
   padding: 10px;
   border: 1px dashed #dcdfe6;
   border-radius: 4px;
+}
+.detail-header {
+  margin-bottom: 20px;
 }
 </style>

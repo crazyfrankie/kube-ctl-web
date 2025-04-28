@@ -1,112 +1,172 @@
 <template>
-  <div class="container-list" ref="containerList">
-    <template v-if="isEdit">
-      <template v-for="(container, index) in containers">
-        <container-form 
-          :key="index"
-          :container="container"
-          @remove="() => removeContainer(index)"
-          @expanded="handleExpanded"
-        />
-      </template>
-    </template>
-    <template v-else>
-      <template v-for="(container, index) in containers">
-        <probe-info
-          :key="index"
-          :container="container"
-          @expanded="handleExpanded"
-        />
-      </template>
-    </template>
-    
-    <el-button v-if="isEdit" type="primary" plain @click="addContainer">
-      添加容器
-    </el-button>
+  <div class="container-list">
+    <el-table :data="containers" border style="width: 100%">
+      <el-table-column prop="name" label="Container Name" min-width="120" />
+      <el-table-column label="Image" min-width="200">
+        <template slot-scope="scope">
+          {{ scope.row.image }}
+          <el-tag size="mini" style="margin-left: 5px">{{ scope.row.imagePullPolicy || 'IfNotPresent' }}</el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column label="Resource Quotas" min-width="180">
+        <template slot-scope="scope">
+          <div v-if="scope.row.resources && scope.row.resources.enable">
+            <div>CPU: {{ scope.row.resources.CPUReq }}m / {{ scope.row.resources.CPULimit }}m</div>
+            <div>Memory: {{ scope.row.resources.memory }}Mi / {{ scope.row.resources.memoryLimit }}Mi</div>
+          </div>
+          <span v-else>-</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="Probes" min-width="120">
+        <template slot-scope="scope">
+          <div>
+            <el-popover v-if="scope.row.livenessProbe && scope.row.livenessProbe.enable" placement="top" trigger="hover">
+              <probe-info :probe="scope.row.livenessProbe" />
+              <el-tag slot="reference" type="success" size="small">Liveness</el-tag>
+            </el-popover>
+            <el-popover v-if="scope.row.readyProbe && scope.row.readyProbe.enable" placement="top" trigger="hover">
+              <probe-info :probe="scope.row.readyProbe" />
+              <el-tag slot="reference" type="warning" size="small" style="margin-left: 5px">Readiness</el-tag>
+            </el-popover>
+            <el-popover v-if="scope.row.startUpProbe && scope.row.startUpProbe.enable" placement="top" trigger="hover">
+              <probe-info :probe="scope.row.startUpProbe" />
+              <el-tag slot="reference" type="info" size="small" style="margin-left: 5px">Startup</el-tag>
+            </el-popover>
+            <span v-if="!hasProbes(scope.row)">-</span>
+          </div>
+        </template>
+      </el-table-column>
+      <el-table-column label="Environment" min-width="200">
+        <template slot-scope="scope">
+          <div v-if="scope.row.env && scope.row.env.length">
+            <el-popover placement="right" width="400" trigger="hover">
+              <el-table :data="scope.row.env" size="mini" border>
+                <el-table-column prop="key" label="Name" min-width="150" show-overflow-tooltip />
+                <el-table-column prop="value" label="Value" min-width="150" show-overflow-tooltip />
+              </el-table>
+              <div slot="reference" class="env-preview">
+                {{ scope.row.env.length }} Environment Variables
+              </div>
+            </el-popover>
+          </div>
+          <span v-else>-</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="Volumes" min-width="180">
+        <template slot-scope="scope">
+          <div v-if="scope.row.volumeMounts && scope.row.volumeMounts.length">
+            <el-popover placement="right" width="400" trigger="hover">
+              <el-table :data="scope.row.volumeMounts" size="mini" border>
+                <el-table-column prop="mountName" label="Name" min-width="120" show-overflow-tooltip />
+                <el-table-column prop="mountPath" label="Mount Path" min-width="150" show-overflow-tooltip />
+                <el-table-column label="Read Only" width="100" align="center">
+                  <template slot-scope="props">
+                    <el-tag size="mini" :type="props.row.readOnly ? 'warning' : 'success'">
+                      {{ props.row.readOnly ? 'Yes' : 'No' }}
+                    </el-tag>
+                  </template>
+                </el-table-column>
+              </el-table>
+              <div slot="reference" class="volume-preview">
+                {{ scope.row.volumeMounts.length }} Volume Mounts
+              </div>
+            </el-popover>
+          </div>
+          <span v-else>-</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="Commands" min-width="180">
+        <template slot-scope="scope">
+          <div v-if="scope.row.command && scope.row.command.length">
+            <el-popover placement="left" width="300" trigger="hover">
+              <div>
+                <div class="command-section">
+                  <div class="command-label">Command:</div>
+                  <div class="command-value">{{ scope.row.command.join(' ') }}</div>
+                </div>
+                <div v-if="scope.row.args && scope.row.args.length" class="command-section">
+                  <div class="command-label">Args:</div>
+                  <div class="command-value">{{ scope.row.args.join(' ') }}</div>
+                </div>
+              </div>
+              <div slot="reference" class="command-preview">View Command</div>
+            </el-popover>
+          </div>
+          <span v-else>-</span>
+        </template>
+      </el-table-column>
+    </el-table>
   </div>
 </template>
 
 <script>
-import ContainerForm from './container-form'
 import ProbeInfo from './probe-info'
 
 export default {
   name: 'ContainerList',
   components: {
-    ContainerForm,
     ProbeInfo
   },
   props: {
     containers: {
       type: Array,
-      required: true
-    },
-    isEdit: {
-      type: Boolean,
-      default: false
+      default: () => []
     }
   },
   methods: {
-    addContainer() {
-      this.containers.push({
-        name: '',
-        image: '',
-        imagePullPolicy: 'Always',
-        workingDir: '',
-        privileged: false,
-        tty: false,
-        command: [],
-        args: [],
-        ports: [],
-        env: [],
-        volumeMounts: [],
-        resources: null,
-        livenessProbe: {},
-        readinessProbe: {},
-        startupProbe: {}
-      })
-      
-      // 添加容器后自动滚动到新添加的容器位置
-      this.$nextTick(() => {
-        const containers = this.$el.querySelectorAll('.container-form')
-        const lastContainer = containers[containers.length - 1]
-        this.scrollToElement(lastContainer)
-      })
-    },
-    removeContainer(index) {
-      this.containers.splice(index, 1)
-    },
-    handleExpanded(element) {
-      // 当任何部分被展开时，滚动到展开的位置
-      this.scrollToElement(element)
-    },
-    scrollToElement(element) {
-      if (!element) return
-      
-      // 获取元素的位置信息
-      const rect = element.getBoundingClientRect()
-      const isVisible = (
-        rect.top >= 0 &&
-        rect.bottom <= (window.innerHeight || document.documentElement.clientHeight)
-      )
-
-      if (!isVisible) {
-        const scrollOffset = window.pageYOffset
-        const targetPosition = scrollOffset + rect.top - 100 // 上方预留100px空间
-        
-        // 使用平滑滚动
-        window.scrollTo({
-          top: targetPosition,
-          behavior: 'smooth'
-        })
-      }
+    hasProbes(container) {
+      return (container.livenessProbe && container.livenessProbe.enable) ||
+             (container.readyProbe && container.readyProbe.enable) ||
+             (container.startUpProbe && container.startUpProbe.enable)
     }
   }
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .container-list {
-  margin: 20px 0;
+  width: 100%;
+}
+
+.env-preview,
+.volume-preview,
+.command-preview {
+  color: #409EFF;
+  cursor: pointer;
+  
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.command-section {
+  margin-bottom: 10px;
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
+  
+  .command-label {
+    font-weight: bold;
+    margin-bottom: 5px;
+  }
+  
+  .command-value {
+    font-family: monospace;
+    background: #f5f7fa;
+    padding: 8px;
+    border-radius: 4px;
+    word-break: break-all;
+  }
+}
+
+::v-deep .el-table {
+  .el-tag {
+    &.el-tag--mini {
+      height: 18px;
+      line-height: 16px;
+      padding: 0 4px;
+    }
+  }
 }
 </style>

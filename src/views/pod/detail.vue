@@ -1,67 +1,122 @@
 <template>
   <div class="app-container">
-    <div class="detail-header">
-      <el-page-header @back="goBack" :content="podName" />
+    <div v-loading="loading">
+      <div class="detail-header">
+        <el-page-header @back="goBack" :content="podName" />
+        <el-button type="primary" @click="handleEdit">Edit</el-button>
+      </div>
+
+      <!-- Base Information -->
+      <el-card class="box-card">
+        <div slot="header" class="clearfix">
+          <span>Basic Information</span>
+        </div>
+        <el-form label-width="140px" class="detail-form">
+          <el-form-item label="Name">
+            <span>{{ podDetail.base && podDetail.base.name || '-' }}</span>
+          </el-form-item>
+          <el-form-item label="Namespace">
+            <span>{{ podDetail.base && podDetail.base.namespace || '-' }}</span>
+          </el-form-item>
+          <el-form-item label="Restart Policy">
+            <span>{{ podDetail.base && podDetail.base.restartPolicy || '-' }}</span>
+          </el-form-item>
+          <el-form-item label="Labels">
+            <template v-if="podDetail.base && podDetail.base.labels && podDetail.base.labels.length">
+              <el-tag
+                v-for="label in podDetail.base.labels"
+                :key="label.key"
+                type="info"
+                class="detail-tag"
+              >
+                {{ label.key }}: {{ label.value }}
+              </el-tag>
+            </template>
+            <span v-else>-</span>
+          </el-form-item>
+        </el-form>
+      </el-card>
+
+      <!-- Network Configuration -->
+      <el-card class="box-card">
+        <div slot="header" class="clearfix">
+          <span>Network Configuration</span>
+        </div>
+        <el-form label-width="140px" class="detail-form">
+          <el-form-item label="Hostname">
+            <span>{{ podDetail.network && podDetail.network.hostName || '-' }}</span>
+          </el-form-item>
+          <el-form-item label="Host Network">
+            <span>{{ podDetail.network && podDetail.network.hostNetwork ? 'Yes' : 'No' }}</span>
+          </el-form-item>
+          <el-form-item label="DNS Policy">
+            <span>{{ podDetail.network && podDetail.network.dnsPolicy || '-' }}</span>
+          </el-form-item>
+          <el-form-item label="DNS Servers">
+            <template v-if="podDetail.network && podDetail.network.dnsConfig && podDetail.network.dnsConfig.nameservers && podDetail.network.dnsConfig.nameservers.length">
+              <el-tag
+                v-for="(server, index) in podDetail.network.dnsConfig.nameservers"
+                :key="index"
+                type="info"
+                class="detail-tag"
+              >
+                {{ server }}
+              </el-tag>
+            </template>
+            <span v-else>-</span>
+          </el-form-item>
+          <el-form-item label="Host Aliases">
+            <template v-if="podDetail.network && podDetail.network.hostAliases && podDetail.network.hostAliases.length">
+              <el-table :data="podDetail.network.hostAliases" border style="width: 100%">
+                <el-table-column prop="key" label="IP" min-width="120" />
+                <el-table-column prop="value" label="Hostname" min-width="180" />
+              </el-table>
+            </template>
+            <span v-else>-</span>
+          </el-form-item>
+        </el-form>
+      </el-card>
+
+      <!-- Container Configuration -->
+      <el-card class="box-card">
+        <div slot="header" class="clearfix">
+          <span>Container Configuration</span>
+        </div>
+        <div v-if="podDetail.initContainers && podDetail.initContainers.length" class="container-section">
+          <h3 class="section-title">Init Containers</h3>
+          <container-list :containers="podDetail.initContainers" />
+          <div class="divider-line"></div>
+        </div>
+        <div class="container-section">
+          <h3 class="section-title">Main Containers</h3>
+          <container-list :containers="podDetail.containers || []" />
+        </div>
+      </el-card>
+
+      <!-- Volume Configuration -->
+      <el-card class="box-card">
+        <div slot="header" class="clearfix">
+          <span>Volume Configuration</span>
+        </div>
+        <div v-if="podDetail.volume && podDetail.volume.length">
+          <el-table :data="podDetail.volume" border style="width: 100%">
+            <el-table-column prop="name" label="Name" min-width="120" />
+            <el-table-column prop="type" label="Type" min-width="120" />
+            <el-table-column label="Source" min-width="180">
+              <template slot-scope="scope">
+                {{ getVolumeSource(scope.row) }}
+              </template>
+            </el-table-column>
+            <el-table-column label="Mount Path" min-width="180">
+              <template slot-scope="scope">
+                {{ getVolumeMountPath(scope.row) }}
+              </template>
+            </el-table-column>
+          </el-table>
+        </div>
+        <div v-else class="empty-block">No volumes configured</div>
+      </el-card>
     </div>
-
-    <el-card class="box-card" v-loading="loading">
-      <div slot="header" class="clearfix">
-        <span>基本信息</span>
-      </div>
-      <el-descriptions :column="2" border>
-        <el-descriptions-item label="名称">{{ podDetail.base && podDetail.base.name }}</el-descriptions-item>
-        <el-descriptions-item label="命名空间">{{ podDetail.base && podDetail.base.namespace }}</el-descriptions-item>
-        <el-descriptions-item label="重启策略">{{ podDetail.base && podDetail.base.restartPolicy }}</el-descriptions-item>
-        <el-descriptions-item label="标签">
-          <el-tag v-for="label in (podDetail.base && podDetail.base.labels)" :key="label.key" type="info" style="margin-right: 5px">
-            {{ label.key }}: {{ label.value }}
-          </el-tag>
-        </el-descriptions-item>
-      </el-descriptions>
-    </el-card>
-
-    <el-card class="box-card" style="margin-top: 20px">
-      <div slot="header" class="clearfix">
-        <span>网络配置</span>
-      </div>
-      <el-descriptions :column="2" border>
-        <el-descriptions-item label="主机名">{{ podDetail.network && podDetail.network.hostName }}</el-descriptions-item>
-        <el-descriptions-item label="使用主机网络">{{ podDetail.network && podDetail.network.hostNetwork ? '是' : '否' }}</el-descriptions-item>
-        <el-descriptions-item label="DNS策略">{{ podDetail.network && podDetail.network.dnsPolicy }}</el-descriptions-item>
-        <el-descriptions-item label="DNS服务器">
-          {{ podDetail.network && podDetail.network.dnsConfig && podDetail.network.dnsConfig.nameservers && podDetail.network.dnsConfig.nameservers.join(', ') }}
-        </el-descriptions-item>
-        <el-descriptions-item label="主机别名">
-          <div v-for="alias in (podDetail.network && podDetail.network.hostAliases)" :key="alias.key">
-            {{ alias.key }}: {{ alias.value }}
-          </div>
-        </el-descriptions-item>
-      </el-descriptions>
-    </el-card>
-
-    <el-card class="box-card" style="margin-top: 20px">
-      <div slot="header" class="clearfix">
-        <span>容器列表</span>
-      </div>
-      <div v-if="podDetail.initContainers && podDetail.initContainers.length > 0">
-        <h4>初始化容器</h4>
-        <container-list :containers="podDetail.initContainers" />
-      </div>
-      <div style="margin-top: 20px">
-        <h4>主容器</h4>
-        <container-list :containers="podDetail.containers || []" />
-      </div>
-    </el-card>
-
-    <el-card class="box-card" style="margin-top: 20px">
-      <div slot="header" class="clearfix">
-        <span>存储卷</span>
-      </div>
-      <el-table :data="podDetail.volume || []" border>
-        <el-table-column prop="name" label="名称" />
-        <el-table-column prop="type" label="类型" />
-      </el-table>
-    </el-card>
   </div>
 </template>
 
@@ -78,74 +133,150 @@ export default {
     return {
       loading: false,
       podName: '',
-      podDetail: {},
-      pollingTimer: null,
-      isPolling: false
+      podDetail: {}
     }
   },
   created() {
     this.fetchPodDetail()
   },
-  beforeDestroy() {
-    this.stopPolling()
-  },
   methods: {
     async fetchPodDetail() {
       const { namespace, name } = this.$route.query
       if (!namespace || !name) {
-        Message.error('参数错误')
+        Message.error('Invalid parameters')
         return
       }
       this.podName = name
       this.loading = true
       try {
-        const response = await this.$store.dispatch('pod/getPodDetail', {
-          namespace,
-          name
-        })
-        this.podDetail = response.data
-        
-        // 如果Pod不是终态，开始轮询
-        if (!this.isPodInTerminalState(this.podDetail.status)) {
-          this.startPolling()
+        const response = await this.$store.dispatch('pod/getPodDetail', { namespace, name })
+        if (response.data) {
+          this.podDetail = response.data
         }
       } catch (error) {
-        Message.error('获取Pod详情失败')
-      }
-      this.loading = false
-    },
-    isPodInTerminalState(status) {
-      const terminalStates = ['Running', 'Failed', 'Succeeded']
-      return terminalStates.includes(status)
-    },
-    startPolling() {
-      if (!this.isPolling) {
-        this.isPolling = true
-        this.pollingTimer = setInterval(() => {
-          this.fetchPodDetail()
-        }, 5000) // 每5秒轮询一次
+        console.error('Error fetching pod details:', error)
+        Message.error('Failed to fetch Pod details')
+      } finally {
+        this.loading = false
       }
     },
-    stopPolling() {
-      if (this.pollingTimer) {
-        clearInterval(this.pollingTimer)
-        this.pollingTimer = null
+    getVolumeSource(volume) {
+      switch (volume.type) {
+        case 'configMap':
+          return volume.configMap && volume.configMap.name ? `ConfigMap: ${volume.configMap.name}` : '-'
+        case 'secret':
+          return volume.secret && volume.secret.secretName ? `Secret: ${volume.secret.secretName}` : '-'
+        case 'hostPath':
+          return volume.hostPath && volume.hostPath.path ? `Host Path: ${volume.hostPath.path}` : '-'
+        case 'emptyDir':
+          return 'Empty Directory'
+        default:
+          return '-'
       }
-      this.isPolling = false
+    },
+    getVolumeMountPath(volume) {
+      if (!this.podDetail.containers) return '-'
+
+      const paths = []
+      this.podDetail.containers.forEach(container => {
+        if (container.volumeMounts) {
+          const mount = container.volumeMounts.find(m => m.mountName === volume.name)
+          if (mount) {
+            paths.push(`${container.name}: ${mount.mountPath}`)
+          }
+        }
+      })
+
+      if (this.podDetail.initContainers) {
+        this.podDetail.initContainers.forEach(container => {
+          if (container.volumeMounts) {
+            const mount = container.volumeMounts.find(m => m.mountName === volume.name)
+            if (mount) {
+              paths.push(`${container.name}: ${mount.mountPath}`)
+            }
+          }
+        })
+      }
+
+      return paths.length ? paths.join('\n') : '-'
     },
     goBack() {
-      this.stopPolling() // 返回时停止轮询
-      this.$router.push('/pod/list')
+      const { namespace } = this.$route.query
+      this.$router.push({
+        path: '/pod/list',
+        query: { namespace }
+      })
+    },
+    handleEdit() {
+      const { namespace, name } = this.$route.query
+      this.$router.push(`/pod/create?namespace=${namespace}&name=${name}&edit=true`)
     }
   }
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .detail-header {
   margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
+
 .box-card {
   margin-bottom: 20px;
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.detail-form {
+  .el-form-item {
+    margin-bottom: 18px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+}
+
+.detail-tag {
+  margin-right: 8px;
+  margin-bottom: 8px;
+}
+
+.section-title {
+  margin: 0 0 16px;
+  font-size: 15px;
+  font-weight: 500;
+  color: #303133;
+}
+
+.container-section {
+  margin-bottom: 20px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.divider-line {
+  height: 1px;
+  background-color: #EBEEF5;
+  margin: 24px 0;
+}
+
+.empty-block {
+  padding: 24px;
+  text-align: center;
+  color: #909399;
+  font-size: 14px;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+}
+
+::v-deep .el-table {
+  margin-top: 8px;
 }
 </style>

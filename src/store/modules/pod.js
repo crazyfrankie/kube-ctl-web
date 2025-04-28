@@ -1,4 +1,4 @@
-import { createPod, getPodList, getPodDetail, deletePod, getNamespaces } from '@/api/pod'
+import { createPod, getPodList, searchPod, getPodDetail, deletePod, getNamespaces } from '@/api/pod'
 
 const state = {
   podName: '',
@@ -31,9 +31,20 @@ const actions = {
   },
 
   // 获取Pod列表
-  getPodList({ commit }, params) {
+  getPodList({ commit }, namespace) {
     return new Promise((resolve, reject) => {
-      getPodList(params).then(response => {
+      getPodList({ namespace }).then(response => {
+        resolve(response)
+      }).catch(error => {
+        reject(error)
+      })
+    })
+  },
+
+  // 搜索Pod
+  searchPod({ commit }, params) {
+    return new Promise((resolve, reject) => {
+      searchPod(params).then(response => {
         resolve(response)
       }).catch(error => {
         reject(error)
@@ -45,8 +56,13 @@ const actions = {
   getPodDetail({ commit }, params) {
     return new Promise((resolve, reject) => {
       getPodDetail(params).then(response => {
-        commit('SET_CURRENT_POD', response.data)
-        resolve(response)
+        if (response.data) {
+          // 将Pod详情直接存储到state中
+          commit('SET_CURRENT_POD', response.data)
+          resolve(response)
+        } else {
+          reject(new Error('Invalid response format'))
+        }
       }).catch(error => {
         reject(error)
       })

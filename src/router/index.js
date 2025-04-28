@@ -51,19 +51,19 @@ export const constantRoutes = [
     component: Layout,
     redirect: '/node/nodes',
     name: 'Node',
-    meta: {title: 'node', icon: 'pod'},
+    meta: {title: 'Node Management', icon: 'node'},
     children: [
       {
         path: 'list',
         name: 'NodeList',
         component: () => import('@/views/node/index'),
-        meta: {title: '节点管理', icon: 'node'}
+        meta: {title: 'Node Management', icon: 'node'}
       },
       {
         path: 'edit',
         name: 'Node',
         component: () => import('@/views/node/edit'),
-        meta: {title: 'editnode', icon: 'node', activeMenu: "/node/list"},
+        meta: {title: 'Edit Node', icon: 'node', activeMenu: "/node/list"},
         hidden: true
       }
     ]
@@ -73,26 +73,29 @@ export const constantRoutes = [
     component: Layout,
     redirect: '/pod/list',
     name: 'Pod',
-    meta: {title: 'Pod', icon: 'pod'},
+    meta: {
+      title: 'Pod Management',
+      icon: 'pod'
+    },
     children: [
       {
         path: 'list',
         name: 'PodList',
         component: () => import('@/views/pod/index'),
-        meta: {title: "Pod管理", icon: 'pod'}
+        meta: { title: 'Pod List', icon: 'pod' }
       },
       {
         path: 'create',
         name: 'PodCreate',
         component: () => import('@/views/pod/create'),
-        meta: {title: '创建Pod', icon: 'pod', activeMenu: "/pod/list"},
+        meta: { title: 'Create Pod', icon: 'pod', activeMenu: "/pod/list" },
         hidden: true
       },
       {
         path: 'detail',
         name: 'PodDetail',
         component: () => import('@/views/pod/detail'),
-        meta: {title: 'Pod详情', icon: 'pod', activeMenu: "/pod/list"},
+        meta: { title: 'Pod Details', icon: 'pod', activeMenu: "/pod/list" },
         hidden: true
       }
     ]
@@ -102,7 +105,7 @@ export const constantRoutes = [
     component: Layout,
     redirect: '/volume/configmaps',
     name: 'ConfigMap',
-    meta: {title: '存储卷管理', icon: 'data'},
+    meta: {title: 'Volume Management', icon: 'data'},
     children: [
       {
         path: 'configmaps',

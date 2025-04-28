@@ -2,19 +2,19 @@
   <div class="container-form">
     <el-card class="box-card" ref="containerCard">
       <div slot="header" class="clearfix">
-        <el-button type="danger" size="small" style="float: right" @click="$emit('remove')">删除容器</el-button>
+        <el-button type="danger" size="small" style="float: right" @click="$emit('remove')">Delete Container</el-button>
       </div>
       
       <el-form label-width="100px">
-        <el-form-item label="名称">
+        <el-form-item label="Name">
           <el-input v-model="container.name" />
         </el-form-item>
         
-        <el-form-item label="镜像">
+        <el-form-item label="Image">
           <el-input v-model="container.image" />
         </el-form-item>
         
-        <el-form-item label="拉取策略">
+        <el-form-item label="Pull Policy">
           <el-select v-model="container.imagePullPolicy">
             <el-option label="Always" value="Always" />
             <el-option label="IfNotPresent" value="IfNotPresent" />
@@ -22,11 +22,11 @@
           </el-select>
         </el-form-item>
 
-        <el-form-item label="工作目录">
+        <el-form-item label="Working Dir">
           <el-input v-model="container.workingDir" />
         </el-form-item>
 
-        <el-form-item label="特权模式">
+        <el-form-item label="Privileged">
           <el-switch v-model="container.privileged" />
         </el-form-item>
 
@@ -34,74 +34,72 @@
           <el-switch v-model="container.tty" />
         </el-form-item>
 
-        <el-form-item label="命令">
-          <el-input v-model="commandStr" placeholder="输入命令，用空格分隔" @change="updateCommand" />
+        <el-form-item label="Command">
+          <el-input v-model="commandStr" placeholder="Enter command, space separated" @change="updateCommand" />
         </el-form-item>
 
-        <el-form-item label="参数">
-          <el-input v-model="argsStr" placeholder="输入参数，用空格分隔" @change="updateArgs" />
+        <el-form-item label="Arguments">
+          <el-input v-model="argsStr" placeholder="Enter arguments, space separated" @change="updateArgs" />
         </el-form-item>
 
-        <!-- 端口配置 -->
-        <el-form-item label="端口">
-          <el-button size="small" type="primary" @click="addPort">添加端口</el-button>
+        <!-- Port Configuration -->
+        <el-form-item label="Ports">
+          <el-button size="small" type="primary" @click="addPort">Add Port</el-button>
           <div v-for="(port, index) in container.ports" :key="index" class="port-item" style="margin-top: 10px">
-            <el-input v-model="port.name" placeholder="名称" style="width: 120px" />
-            <el-input v-model.number="port.containerPort" placeholder="容器端口" style="width: 120px; margin: 0 10px" />
-            <el-input v-model.number="port.hostPort" placeholder="主机端口" style="width: 120px" />
-            <el-button type="danger" size="small" @click="removePort(index)" style="margin-left: 10px">删除</el-button>
+            <el-input v-model="port.name" placeholder="Name" style="width: 120px" />
+            <el-input v-model.number="port.containerPort" placeholder="Container Port" style="width: 120px; margin: 0 10px" />
+            <el-input v-model.number="port.hostPort" placeholder="Host Port" style="width: 120px" />
+            <el-button type="danger" size="small" @click="removePort(index)" style="margin-left: 10px">Delete</el-button>
           </div>
         </el-form-item>
 
-        <!-- 环境变量 -->
-        <el-form-item label="环境变量">
-          <el-button size="small" type="primary" @click="addEnv">添加环境变量</el-button>
+        <!-- Environment Variables -->
+        <el-form-item label="Environment">
+          <el-button size="small" type="primary" @click="addEnv">Add Environment Variable</el-button>
           <div v-for="(env, index) in container.env" :key="index" class="env-item" style="margin-top: 10px">
-            <el-input v-model="env.key" placeholder="键" style="width: 180px" />
-            <el-input v-model="env.value" placeholder="值" style="width: 180px; margin: 0 10px" />
-            <el-button type="danger" size="small" @click="removeEnv(index)">删除</el-button>
+            <el-input v-model="env.key" placeholder="Key" style="width: 180px" />
+            <el-input v-model="env.value" placeholder="Value" style="width: 180px; margin: 0 10px" />
+            <el-button type="danger" size="small" @click="removeEnv(index)">Delete</el-button>
           </div>
         </el-form-item>
 
-        <!-- 资源配额 -->
-        <el-form-item label="资源配额">
-          <el-switch v-model="hasResources" @change="handleResourcesChange" />
-          <template v-if="hasResources">
+        <!-- Resource Quotas -->
+        <el-form-item label="Resource Quotas">
+          <el-switch v-model="container.resources.enable" />
+          <template v-if="container.resources.enable">
             <div class="resource-quota" ref="resourceQuota">
-              <el-form-item label="CPU请求">
+              <el-form-item label="CPU Request">
                 <el-input-number 
-                  v-model="container.resources.requests.cpu" 
+                  v-model="container.resources.CPUReq" 
                   :min="0"
-                  :max="64"
-                  :step="0.1"
-                  :precision="1"
+                  :max="64000"
+                  :step="100"
                   controls-position="right"
                 />
-                <span class="unit">核</span>
+                <span class="unit">mCores</span>
               </el-form-item>
-              <el-form-item label="CPU限制">
+              <el-form-item label="CPU Limit">
                 <el-input-number 
-                  v-model="container.resources.limits.cpu" 
+                  v-model="container.resources.CPULimit" 
                   :min="0"
-                  :max="64"
-                  :step="0.1"
-                  :precision="1"
+                  :max="64000"
+                  :step="100"
                   controls-position="right"
                 />
-                <span class="unit">核</span>
+                <span class="unit">mCores</span>
               </el-form-item>
-              <el-form-item label="内存请求">
+              <el-form-item label="Memory Request">
                 <el-input-number 
-                  v-model="container.resources.requests.memory" 
+                  v-model="container.resources.memory" 
                   :min="0"
                   :step="64"
                   controls-position="right"
                 />
                 <span class="unit">Mi</span>
               </el-form-item>
-              <el-form-item label="内存限制">
+              <el-form-item label="Memory Limit">
                 <el-input-number 
-                  v-model="container.resources.limits.memory" 
+                  v-model="container.resources.memoryLimit" 
                   :min="0"
                   :step="64"
                   controls-position="right"
@@ -112,33 +110,33 @@
           </template>
         </el-form-item>
 
-        <!-- 探针配置 -->
-        <el-form-item label="存活探针">
+        <!-- Probe Configuration -->
+        <el-form-item label="Liveness Probe">
           <div ref="livenessProbeRef">
-            <probe-form ref="livenessProbe" v-model="container.livenessProbe" @enable-change="handleProbeEnableChange($event, 'livenessProbeRef')" />
+            <probe-form ref="livenessProbe" v-model="container.livenessProbe" />
           </div>
         </el-form-item>
 
-        <el-form-item label="就绪探针">
+        <el-form-item label="Readiness Probe">
           <div ref="readinessProbeRef">
-            <probe-form ref="readinessProbe" v-model="container.readyProbe" @enable-change="handleProbeEnableChange($event, 'readinessProbeRef')" />
+            <probe-form ref="readinessProbe" v-model="container.readyProbe" />
           </div>
         </el-form-item>
 
-        <el-form-item label="启动探针">
+        <el-form-item label="Startup Probe">
           <div ref="startupProbeRef">
-            <probe-form ref="startupProbe" v-model="container.startUpProbe" @enable-change="handleProbeEnableChange($event, 'startupProbeRef')" />
+            <probe-form ref="startupProbe" v-model="container.startUpProbe" />
           </div>
         </el-form-item>
 
-        <!-- 挂载卷 -->
-        <el-form-item label="挂载卷">
-          <el-button size="small" type="primary" @click="addVolumeMount">添加挂载</el-button>
+        <!-- Volume Mounts -->
+        <el-form-item label="Volumes">
+          <el-button size="small" type="primary" @click="addVolumeMount">Add Mount</el-button>
           <div v-for="(mount, index) in container.volumeMounts" :key="index" class="mount-item" style="margin-top: 10px">
-            <el-input v-model="mount.mountName" placeholder="卷名称" style="width: 150px" />
-            <el-input v-model="mount.mountPath" placeholder="挂载路径" style="width: 150px; margin: 0 10px" />
-            <el-switch v-model="mount.readOnly" active-text="只读" />
-            <el-button type="danger" size="small" @click="removeVolumeMount(index)" style="margin-left: 10px">删除</el-button>
+            <el-input v-model="mount.mountName" placeholder="Volume Name" style="width: 150px" />
+            <el-input v-model="mount.mountPath" placeholder="Mount Path" style="width: 150px; margin: 0 10px" />
+            <el-switch v-model="mount.readOnly" active-text="Read Only" />
+            <el-button type="danger" size="small" @click="removeVolumeMount(index)" style="margin-left: 10px">Delete</el-button>
           </div>
         </el-form-item>
       </el-form>
@@ -168,29 +166,26 @@ export default {
     }
   },
   created() {
-    // 初始化命令和参数字符串
+    // Initialize command and arguments strings
     this.commandStr = this.container.command ? this.container.command.join(' ') : ''
     this.argsStr = this.container.args ? this.container.args.join(' ') : ''
     
-    // 初始化资源配额
+    // Initialize resource quotas
     this.initResources()
   },
   methods: {
     initResources() {
-      // 检查是否已经有资源配额配置
+      // Check if resource quotas are already configured
       if (this.container.resources &&
           (this.container.resources.requests || this.container.resources.limits)) {
         this.hasResources = true
       } else {
         this.container.resources = {
-          requests: {
-            cpu: 0.1,
-            memory: 128
-          },
-          limits: {
-            cpu: 0.5,
-            memory: 256
-          }
+          enable: false,
+          CPUReq: 100,
+          CPULimit: 500,
+          memory: 128,
+          memoryLimit: 256
         }
       }
     },
@@ -268,18 +263,18 @@ export default {
     scrollToElement(element) {
       if (!element) return
 
-      // 获取元素的位置信息
+      // Get element position
       const rect = element.getBoundingClientRect()
       const windowHeight = window.innerHeight || document.documentElement.clientHeight
       const bottomVisible = rect.bottom <= windowHeight
       const topVisible = rect.top >= 0
 
-      // 如果元素不在可视区域内
+      // If element is not in the visible area
       if (!bottomVisible || !topVisible) {
-        // 计算滚动位置，将元素滚动到视图中部偏上位置
+        // Calculate scroll position to bring the element into view
         const targetPosition = window.pageYOffset + rect.top - (windowHeight * 0.3)
         
-        // 使用平滑滚动
+        // Use smooth scrolling
         window.scrollTo({
           top: targetPosition,
           behavior: 'smooth'

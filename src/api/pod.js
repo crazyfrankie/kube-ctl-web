@@ -9,26 +9,34 @@ export function createPod(data) {
 }
 
 export function getPodList(params) {
-  const { namespace } = params
   return request({
-    url: `/pod/list?namespace=${namespace}`,
-    method: 'get'
+    url: '/pod/list',
+    method: 'get',
+    params
+  })
+}
+
+export function searchPod(params) {
+  return request({
+    url: '/pod/search',
+    method: 'get',
+    params
   })
 }
 
 export function getPodDetail(params) {
-  const { namespace, name } = params
   return request({
-    url: `/pod/detail?namespace=${namespace}&name=${name}`,
-    method: 'get'
+    url: '/pod/detail',
+    method: 'get',
+    params
   })
 }
 
 export function deletePod(params) {
-  const { namespace, name } = params
   return request({
-    url: `/pod?namespace=${namespace}&name=${name}`,
-    method: 'delete'
+    url: '/pod',
+    method: 'delete',
+    params
   })
 }
 
