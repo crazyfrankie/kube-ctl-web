@@ -143,9 +143,14 @@ export default {
           namespace: this.currentNamespace,
           name: this.searchPodName.trim()
         })
-        this.podList = response.data || []
+        if (response.data) {
+          this.podList = Array.isArray(response.data) ? response.data : [response.data]
+        } else {
+          this.podList = []
+        }
       } catch (error) {
         Message.error('Failed to search Pods')
+        this.podList = []
       } finally {
         this.listLoading = false
       }

@@ -19,7 +19,7 @@ export function getPodList(params) {
 export function searchPod(params) {
   return request({
     url: '/pod/search',
-    method: 'get',
+    method: 'post',
     params
   })
 }
