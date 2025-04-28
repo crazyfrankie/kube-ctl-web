@@ -36,55 +36,109 @@ export const constantRoutes = [
     component: () => import('@/views/login/index'),
     hidden: true
   },
-
   {
     path: '/404',
     component: () => import('@/views/404'),
     hidden: true
   },
-  
-  {
-    path: '/pod',
-    component: () => import('@/views/pod/index'),
-    name: 'Pod',
-    meta: { title: 'Pod', icon: 'el-icon-s-help' },
-  },
-
   {
     path: '/',
     component: Layout,
-    redirect: '/dashboard',
-    children: [{
-      path: 'dashboard',
-      name: 'Dashboard',
-      component: () => import('@/views/dashboard/index'),
-      meta: { title: 'Dashboard', icon: 'dashboard' }
-    }]
+    redirect: '/pod/list'
   },
-
   {
-    path: '/example',
+    path: '/node',
     component: Layout,
-    redirect: '/example/table',
-    name: 'Example',
-    meta: { title: 'Example', icon: 'el-icon-s-help' },
+    redirect: '/node/nodes',
+    name: 'Node',
+    meta: {title: 'node', icon: 'pod'},
     children: [
       {
-        path: 'table',
-        name: 'Table',
+        path: 'list',
+        name: 'NodeList',
+        component: () => import('@/views/node/index'),
+        meta: {title: '节点管理', icon: 'node'}
+      },
+      {
+        path: 'edit',
+        name: 'Node',
+        component: () => import('@/views/node/edit'),
+        meta: {title: 'editnode', icon: 'node', activeMenu: "/node/list"},
+        hidden: true
+      }
+    ]
+  },
+  {
+    path: '/pod',
+    component: Layout,
+    redirect: '/pod/list',
+    name: 'Pod',
+    meta: {title: 'Pod', icon: 'pod'},
+    children: [
+      {
+        path: 'list',
+        name: 'PodList',
         component: () => import('@/views/pod/index'),
-        meta: { title: 'Table', icon: 'table' }
+        meta: {title: "Pod管理", icon: 'pod'}
+      },
+      {
+        path: 'create',
+        name: 'PodCreate',
+        component: () => import('@/views/pod/create'),
+        meta: {title: '创建Pod', icon: 'pod', activeMenu: "/pod/list"},
+        hidden: true
+      },
+      {
+        path: 'detail',
+        name: 'PodDetail',
+        component: () => import('@/views/pod/detail'),
+        meta: {title: 'Pod详情', icon: 'pod', activeMenu: "/pod/list"},
+        hidden: true
+      }
+    ]
+  },
+  {
+    path: '/volume',
+    component: Layout,
+    redirect: '/volume/configmaps',
+    name: 'ConfigMap',
+    meta: {title: '存储卷管理', icon: 'data'},
+    children: [
+      {
+        path: 'configmaps',
+        name: 'ConfigMaps',
+        component: () => import('@/views/configmap/index'),
+        meta: {title: 'ConfigMap', icon: 'cm', activeMenu: "/volume/configmaps"}
+      },
+      {
+        path: 'configmap-edit',
+        name: 'ConfigMapEdit',
+        component: () => import('@/views/configmap/edit'),
+        meta: {title: 'ConfigMap', icon: 'cm', activeMenu: "/volume/configmaps"},
+        hidden: true,
+      },
+      {
+        path: 'secrets',
+        name: 'Secrets',
+        component: () => import('@/views/secret/index'),
+        meta: {title: 'Secret', icon: 'secret', activeMenu: "/volume/secrets"}
+      },
+      {
+        path: 'secret-edit',
+        name: 'SecretEdit',
+        component: () => import('@/views/secret/edit'),
+        meta: {title: 'Secret', icon: 'secret', activeMenu: "/volume/secrets"},
+        hidden: true,
       },
     ]
   },
-
   // 404 page must be placed at the end !!!
-  { path: '*', redirect: '/404', hidden: true }
+  {path: '*', redirect: '/404', hidden: true}
 ]
 
 const createRouter = () => new Router({
   // mode: 'history', // require service support
-  scrollBehavior: () => ({ y: 0 }),
+  scrollBehavior: () => ({y: 0}),
   routes: constantRoutes
 })
 
