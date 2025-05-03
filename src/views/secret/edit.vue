@@ -1,13 +1,13 @@
 <template>
   <div class="app-container">
     <div class="detail-header">
-      <el-page-header @back="goBack" :content="isEdit ? '编辑Secret' : '创建Secret'" />
+      <el-page-header @back="goBack" :content="isEdit ? 'Edit Secret' : 'Create Secret'" />
     </div>
 
     <el-card class="box-card" v-loading="loading">
       <el-form ref="form" :model="form" :rules="rules" label-width="120px">
-        <el-form-item label="命名空间" prop="namespace" v-if="!isEdit">
-          <el-select v-model="form.namespace" placeholder="请选择命名空间">
+        <el-form-item label="Namespace" prop="namespace" v-if="!isEdit">
+          <el-select v-model="form.namespace" placeholder="Select namespace">
             <el-option
               v-for="item in namespaces"
               :key="item.name"
@@ -16,18 +16,18 @@
             />
           </el-select>
         </el-form-item>
-        <el-form-item label="名称" prop="name" v-if="!isEdit">
-          <el-input v-model="form.name" placeholder="请输入Secret名称"></el-input>
+        <el-form-item label="Name" prop="name" v-if="!isEdit">
+          <el-input v-model="form.name" placeholder="Enter Secret name"></el-input>
         </el-form-item>
-        <el-form-item label="类型" prop="type" v-if="!isEdit">
-          <el-select v-model="form.type" placeholder="请选择Secret类型">
+        <el-form-item label="Type" prop="type" v-if="!isEdit">
+          <el-select v-model="form.type" placeholder="Select Secret type">
             <el-option label="Opaque" value="Opaque"></el-option>
             <el-option label="kubernetes.io/service-account-token" value="kubernetes.io/service-account-token"></el-option>
             <el-option label="kubernetes.io/dockerconfigjson" value="kubernetes.io/dockerconfigjson"></el-option>
             <el-option label="kubernetes.io/tls" value="kubernetes.io/tls"></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="数据">
+        <el-form-item label="Data">
           <div v-for="(item, index) in form.data" :key="index" class="data-item">
             <el-input v-model="item.key" placeholder="Key" style="width: 200px; margin-right: 10px;"></el-input>
             <el-input
@@ -39,11 +39,11 @@
             ></el-input>
             <el-button type="danger" icon="el-icon-delete" circle @click="removeData(index)"></el-button>
           </div>
-          <el-button type="primary" icon="el-icon-plus" @click="addData">添加数据</el-button>
+          <el-button type="primary" icon="el-icon-plus" @click="addData">Add Data</el-button>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="onSubmit">{{ isEdit ? '保存' : '创建' }}</el-button>
-          <el-button @click="goBack">取消</el-button>
+          <el-button type="primary" @click="onSubmit">{{ isEdit ? 'Save' : 'Create' }}</el-button>
+          <el-button @click="goBack">Cancel</el-button>
         </el-form-item>
       </el-form>
     </el-card>
@@ -68,20 +68,24 @@ export default {
       },
       rules: {
         namespace: [
-          { required: true, message: '请选择命名空间', trigger: 'change' }
+          { required: true, message: 'Please select a namespace', trigger: 'change' }
         ],
         name: [
-          { required: true, message: '请输入名称', trigger: 'blur' }
+          { required: true, message: 'Please enter a name', trigger: 'blur' },
+          { pattern: /^[a-z0-9]([-a-z0-9]*[a-z0-9])?$/, 
+            message: 'Name can only contain lowercase letters, numbers, and hyphens, and must start and end with a letter or number', 
+            trigger: 'blur' 
+          }
         ],
         type: [
-          { required: true, message: '请选择类型', trigger: 'change' }
+          { required: true, message: 'Please select a type', trigger: 'change' }
         ]
       }
     }
   },
   computed: {
     ...mapState({
-      namespaces: state => state.pod.namespaces
+      namespaces: state => state.pod.namespaces || []
     })
   },
   created() {
@@ -104,7 +108,8 @@ export default {
       try {
         await this.$store.dispatch('pod/getNamespaces')
       } catch (error) {
-        Message.error('获取命名空间列表失败')
+        console.error('Failed to get namespace list:', error)
+        Message.error('Failed to get namespace list')
       }
     },
     async fetchData() {
@@ -121,9 +126,11 @@ export default {
           value: Buffer.from(value, 'base64').toString()
         }))
       } catch (error) {
-        Message.error('获取Secret详情失败')
+        console.error('Failed to get Secret details:', error)
+        Message.error('Failed to get Secret details')
+      } finally {
+        this.loading = false
       }
-      this.loading = false
     },
     addData() {
       this.form.data.push({ key: '', value: '' })
@@ -133,7 +140,7 @@ export default {
     },
     async onSubmit() {
       if (this.form.data.some(item => !item.key || !item.value)) {
-        Message.warning('请填写完整的数据信息')
+        Message.warning('Please fill in complete data information')
         return
       }
 
@@ -143,26 +150,30 @@ export default {
       })
 
       try {
+        this.loading = true
         if (this.isEdit) {
-          await this.$store.dispatch('secret/updateSecret', {
+          await this.$store.dispatch('secret/createOrUpdateSecret', {
             namespace: this.form.namespace,
             name: this.form.name,
             type: this.form.type,
             data
           })
-          Message.success('更新成功')
+          Message.success('Updated successfully')
         } else {
-          await this.$store.dispatch('secret/createSecret', {
+          await this.$store.dispatch('secret/createOrUpdateSecret', {
             namespace: this.form.namespace,
             name: this.form.name,
             type: this.form.type,
             data
           })
-          Message.success('创建成功')
+          Message.success('Created successfully')
         }
         this.goBack()
       } catch (error) {
-        Message.error(this.isEdit ? '更新失败' : '创建失败')
+        console.error('Failed to save Secret:', error)
+        Message.error(this.isEdit ? 'Update failed' : 'Creation failed')
+      } finally {
+        this.loading = false
       }
     },
     goBack() {

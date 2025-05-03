@@ -7,6 +7,7 @@ import user from './modules/user'
 import pod from './modules/pod'
 import node from './modules/node'
 import configmap from './modules/configmap'
+import secret from './modules/secret'
 
 Vue.use(Vuex)
 
@@ -17,7 +18,8 @@ const store = new Vuex.Store({
     user,
     pod,
     node,
-    configmap
+    configmap,
+    secret
   },
   getters
 })
