@@ -38,18 +38,59 @@
       </el-table-column>
       <el-table-column label="Environment" min-width="200">
         <template slot-scope="scope">
-          <div v-if="scope.row.env && scope.row.env.length">
-            <el-popover placement="right" width="400" trigger="hover">
-              <el-table :data="scope.row.env" size="mini" border>
-                <el-table-column prop="key" label="Name" min-width="150" show-overflow-tooltip />
-                <el-table-column prop="value" label="Value" min-width="150" show-overflow-tooltip />
-              </el-table>
-              <div slot="reference" class="env-preview">
-                {{ scope.row.env.length }} Environment Variables
-              </div>
-            </el-popover>
+          <div>
+            <!-- Individual Environment Variables -->
+            <div v-if="scope.row.env && scope.row.env.length">
+              <el-popover placement="right" width="500" trigger="hover">
+                <el-tabs>
+                  <el-tab-pane label="Environment Variables">
+                    <el-table :data="scope.row.env" size="mini" border>
+                      <el-table-column prop="name" label="Name" min-width="140" show-overflow-tooltip />
+                      <el-table-column label="Type" min-width="100">
+                        <template slot-scope="props">
+                          <el-tag size="mini" :type="getEnvTypeTag(props.row.type)">
+                            {{ props.row.type === 'configMap' ? 'ConfigMap' : 
+                              props.row.type === 'secret' ? 'Secret' : 'Value' }}
+                          </el-tag>
+                        </template>
+                      </el-table-column>
+                      <el-table-column label="Value/Reference" min-width="160" show-overflow-tooltip>
+                        <template slot-scope="props">
+                          {{ props.row.type === 'default' ? props.row.value : props.row.refName }}
+                        </template>
+                      </el-table-column>
+                    </el-table>
+                  </el-tab-pane>
+                </el-tabs>
+                <div slot="reference" class="env-preview">
+                  {{ scope.row.env.length }} Environment Variables
+                </div>
+              </el-popover>
+            </div>
+
+            <!-- EnvsFrom - Environment from ConfigMaps/Secrets -->
+            <div v-if="scope.row.envsFrom && scope.row.envsFrom.length" style="margin-top: 5px">
+              <el-popover placement="right" width="400" trigger="hover">
+                <el-table :data="scope.row.envsFrom" size="mini" border>
+                  <el-table-column label="Type" min-width="100">
+                    <template slot-scope="props">
+                      <el-tag size="mini" :type="getEnvTypeTag(props.row.refType)">
+                        {{ props.row.refType === 'configMap' ? 'ConfigMap' : 'Secret' }}
+                      </el-tag>
+                    </template>
+                  </el-table-column>
+                  <el-table-column prop="name" label="Name" min-width="150" show-overflow-tooltip />
+                  <el-table-column prop="prefix" label="Prefix" min-width="100" show-overflow-tooltip />
+                </el-table>
+                <div slot="reference" class="env-preview">
+                  {{ scope.row.envsFrom.length }} EnvFrom Resources
+                </div>
+              </el-popover>
+            </div>
+
+            <span v-if="(!scope.row.env || !scope.row.env.length) && 
+                        (!scope.row.envsFrom || !scope.row.envsFrom.length)">-</span>
           </div>
-          <span v-else>-</span>
         </template>
       </el-table-column>
       <el-table-column label="Volumes" min-width="180">
@@ -118,6 +159,11 @@ export default {
       return (container.livenessProbe && container.livenessProbe.enable) ||
              (container.readyProbe && container.readyProbe.enable) ||
              (container.startUpProbe && container.startUpProbe.enable)
+    },
+    getEnvTypeTag(type) {
+      if (type === 'configMap') return 'success'
+      if (type === 'secret') return 'danger'
+      return 'info' // default value type
     }
   }
 }

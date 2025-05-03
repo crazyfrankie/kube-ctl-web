@@ -57,9 +57,33 @@
         <el-form-item label="Environment">
           <el-button size="small" type="primary" @click="addEnv">Add Environment Variable</el-button>
           <div v-for="(env, index) in container.env" :key="index" class="env-item" style="margin-top: 10px">
-            <el-input v-model="env.key" placeholder="Key" style="width: 180px" />
-            <el-input v-model="env.value" placeholder="Value" style="width: 180px; margin: 0 10px" />
-            <el-button type="danger" size="small" @click="removeEnv(index)">Delete</el-button>
+            <el-input v-model="env.name" placeholder="Name" style="width: 140px" />
+            <el-select v-model="env.type" style="width: 120px; margin: 0 10px">
+              <el-option label="Value" value="default" />
+              <el-option label="ConfigMap" value="configMap" />
+              <el-option label="Secret" value="secret" />
+            </el-select>
+            <template v-if="env.type === 'default'">
+              <el-input v-model="env.value" placeholder="Value" style="width: 180px" />
+            </template>
+            <template v-else>
+              <el-input v-model="env.refName" placeholder="Resource Name" style="width: 180px" />
+            </template>
+            <el-button type="danger" size="small" @click="removeEnv(index)" style="margin-left: 10px">Delete</el-button>
+          </div>
+        </el-form-item>
+
+        <!-- Environment From Resources -->
+        <el-form-item label="Env From">
+          <el-button size="small" type="primary" @click="addEnvFrom">Add EnvFrom Resource</el-button>
+          <div v-for="(envFrom, index) in container.envsFrom" :key="index" class="envfrom-item" style="margin-top: 10px">
+            <el-select v-model="envFrom.refType" style="width: 120px">
+              <el-option label="ConfigMap" value="configMap" />
+              <el-option label="Secret" value="secret" />
+            </el-select>
+            <el-input v-model="envFrom.name" placeholder="Resource Name" style="width: 180px; margin: 0 10px" />
+            <el-input v-model="envFrom.prefix" placeholder="Prefix (optional)" style="width: 150px" />
+            <el-button type="danger" size="small" @click="removeEnvFrom(index)" style="margin-left: 10px">Delete</el-button>
           </div>
         </el-form-item>
 
@@ -233,8 +257,10 @@ export default {
     },
     addEnv() {
       this.container.env.push({
-        key: '',
-        value: ''
+        name: '',
+        value: '',
+        type: 'default',
+        refName: ''
       })
       this.$nextTick(() => {
         const elements = this.$el.querySelectorAll('.env-item')
@@ -244,6 +270,21 @@ export default {
     },
     removeEnv(index) {
       this.container.env.splice(index, 1)
+    },
+    addEnvFrom() {
+      this.container.envsFrom.push({
+        name: '',
+        prefix: '',
+        refType: 'configMap'
+      })
+      this.$nextTick(() => {
+        const elements = this.$el.querySelectorAll('.envfrom-item')
+        const lastElement = elements[elements.length - 1]
+        this.$emit('expanded', lastElement)
+      })
+    },
+    removeEnvFrom(index) {
+      this.container.envsFrom.splice(index, 1)
     },
     addVolumeMount() {
       this.container.volumeMounts.push({
@@ -310,6 +351,7 @@ export default {
 }
 .port-item,
 .env-item,
+.envfrom-item,
 .mount-item {
   margin-top: 10px;
   transition: all 0.3s ease;

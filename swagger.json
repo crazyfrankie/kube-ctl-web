@@ -1,0 +1,1828 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "contact": {}
+    },
+    "paths": {
+        "/api/configmap": {
+            "get": {
+                "description": "获取指定命名空间下指定ConfigMap的详细信息",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ConfigMap管理"
+                ],
+                "summary": "获取ConfigMap详情",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "命名空间",
+                        "name": "namespace",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "ConfigMap名称",
+                        "name": "name",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "返回ConfigMap的详细信息",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_pkg_response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_internal_model_resp.ConfigMapDetail"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "系统错误(code=30000)",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_pkg_response.Response"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "创建新的 ConfigMap 或更新已存在的 ConfigMap",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ConfigMap管理"
+                ],
+                "summary": "创建或更新 ConfigMap",
+                "parameters": [
+                    {
+                        "description": "ConfigMap 配置信息",
+                        "name": "pod",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_internal_model_req.ConfigMap"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "操作成功，返回成功消息",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_pkg_response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误(code=20001)",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_pkg_response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "系统错误(code=30000)",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_pkg_response.Response"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "删除指定命名空间下的指定ConfigMap",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ConfigMap管理"
+                ],
+                "summary": "删除ConfigMap",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "命名空间",
+                        "name": "namespace",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "ConfigMap名称",
+                        "name": "name",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_pkg_response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "系统错误(code=30000)",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_pkg_response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/configmap/list": {
+            "get": {
+                "description": "获取指定命名空间下的所有ConfigMap列表",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ConfigMap管理"
+                ],
+                "summary": "获取ConfigMap列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "命名空间",
+                        "name": "namespace",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "返回ConfigMap列表",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_pkg_response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_internal_model_resp.ConfigMap"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "系统错误(code=30000)",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_pkg_response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/node/detail": {
+            "get": {
+                "description": "获取集群中单个 Node 信息",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Node管理"
+                ],
+                "summary": "获取 Node 详情",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "node name",
+                        "name": "name",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_pkg_response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_internal_model_resp.NodeDetail"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "系统错误(code=30000)",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_pkg_response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/node/label": {
+            "put": {
+                "description": "为单个 Node 添加 label",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Node管理"
+                ],
+                "summary": "Node 添加标签",
+                "parameters": [
+                    {
+                        "description": "node name and labels",
+                        "name": "node",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_internal_model_req.UpdateLabelReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "更新成功",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_pkg_response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "系统错误(code=30000)",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_pkg_response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/node/list": {
+            "get": {
+                "description": "获取集群中所有 Node 信息",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Node管理"
+                ],
+                "summary": "获取 Node 列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "node 关键词",
+                        "name": "keyword",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_pkg_response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_internal_model_resp.NodeListItem"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "系统错误(code=30000)",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_pkg_response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/node/pods": {
+            "get": {
+                "description": "集群中某个节点下的所有 Pod",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Node管理"
+                ],
+                "summary": "Node 下的所有 Pod",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "命名空间",
+                        "name": "namespace",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Node 名称",
+                        "name": "node",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_pkg_response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_internal_model_resp.PodListItem"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "系统错误(code=30000)",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_pkg_response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/node/taint": {
+            "put": {
+                "description": "集群中某个节点的污点更新",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Node管理"
+                ],
+                "summary": "Node 污点更新",
+                "parameters": [
+                    {
+                        "description": "node name and taints",
+                        "name": "node",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_internal_model_req.UpdateTaintReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "更新成功",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_pkg_response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "系统错误(code=30000)",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_pkg_response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/pod": {
+            "post": {
+                "description": "创建新的Pod或更新已存在的Pod",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Pod管理"
+                ],
+                "summary": "创建或更新Pod",
+                "parameters": [
+                    {
+                        "description": "Pod配置信息",
+                        "name": "pod",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_internal_model_req.Pod"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "操作成功，返回成功消息",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_pkg_response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误(code=20001)或验证错误(code=20002)",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_pkg_response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "系统错误(code=30000)",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_pkg_response.Response"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "删除指定命名空间下的指定Pod",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Pod管理"
+                ],
+                "summary": "删除Pod",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "命名空间",
+                        "name": "namespace",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Pod名称",
+                        "name": "name",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_pkg_response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "系统错误(code=30000)",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_pkg_response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/pod/detail": {
+            "get": {
+                "description": "获取指定命名空间下指定Pod的详细信息",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Pod管理"
+                ],
+                "summary": "获取Pod详情",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "命名空间",
+                        "name": "namespace",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Pod名称",
+                        "name": "name",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "返回Pod的详细信息，包含基础信息、卷配置、网络配置、初始化容器和主容器配置",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_pkg_response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_internal_model_req.Pod"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "系统错误(code=30000)",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_pkg_response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/pod/list": {
+            "get": {
+                "description": "获取指定命名空间下的所有Pod列表",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Pod管理"
+                ],
+                "summary": "获取Pod列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "命名空间",
+                        "name": "namespace",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "返回Pod列表，每个Pod包含名称、就绪状态、运行状态、重启次数、运行时长、IP和所在节点",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_pkg_response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_internal_model_resp.PodListItem"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "系统错误(code=30000)",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_pkg_response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/pod/namespace": {
+            "get": {
+                "description": "获取所有可用的命名空间列表",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Pod管理"
+                ],
+                "summary": "获取命名空间列表",
+                "responses": {
+                    "200": {
+                        "description": "返回命名空间列表，每个命名空间包含名称、创建时间和状态",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_pkg_response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_internal_model_resp.Namespace"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "系统错误(code=30000)",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_pkg_response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/pod/search": {
+            "post": {
+                "description": "搜索指定命名空间下的指定Pod",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Pod管理"
+                ],
+                "summary": "搜索Pod",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "命名空间",
+                        "name": "namespace",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Pod名称",
+                        "name": "name",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "搜索成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_pkg_response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_internal_model_resp.PodListItem"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "系统错误(code=30000)",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_pkg_response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/secret": {
+            "get": {
+                "description": "获取指定命名空间下指定Secret的详细信息",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Secret管理"
+                ],
+                "summary": "获取Secret详情",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "命名空间",
+                        "name": "namespace",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Secret名称",
+                        "name": "name",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "返回Secret的详细信息",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_pkg_response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_internal_model_resp.SecretDetail"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "系统错误(code=30000)",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_pkg_response.Response"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "创建新的 Secret 或更新已存在的 Secret",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Secret管理"
+                ],
+                "summary": "创建或更新 Secret",
+                "parameters": [
+                    {
+                        "description": "Secret 配置信息",
+                        "name": "pod",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_internal_model_req.Secret"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "操作成功，返回成功消息",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_pkg_response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误(code=20001)",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_pkg_response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "系统错误(code=30000)",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_pkg_response.Response"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "删除指定命名空间下的指定Secret",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Secret管理"
+                ],
+                "summary": "删除Secret",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "命名空间",
+                        "name": "namespace",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Secret名称",
+                        "name": "name",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_pkg_response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "系统错误(code=30000)",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_pkg_response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/secret/list": {
+            "get": {
+                "description": "获取指定命名空间下的所有Secret列表",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Secret管理"
+                ],
+                "summary": "获取Secret列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "命名空间",
+                        "name": "namespace",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "返回Secret列表",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_pkg_response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_internal_model_resp.Secret"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "系统错误(code=30000)",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_pkg_response.Response"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "github_com_crazyfrankie_kube-ctl_internal_model_req.Base": {
+            "type": "object",
+            "properties": {
+                "labels": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_internal_model_req.Item"
+                    }
+                },
+                "name": {
+                    "type": "string"
+                },
+                "namespace": {
+                    "type": "string"
+                },
+                "restartPolicy": {
+                    "description": "reboot strategy: Always | Never | On-Failure",
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_crazyfrankie_kube-ctl_internal_model_req.ConfigMap": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_internal_model_req.Item"
+                    }
+                },
+                "labels": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_internal_model_req.Item"
+                    }
+                },
+                "name": {
+                    "type": "string"
+                },
+                "namespace": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_crazyfrankie_kube-ctl_internal_model_req.Container": {
+            "type": "object",
+            "properties": {
+                "args": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "command": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "env": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_internal_model_req.EnvVar"
+                    }
+                },
+                "envsFrom": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_internal_model_req.EnvVarFromResource"
+                    }
+                },
+                "image": {
+                    "type": "string"
+                },
+                "imagePullPolicy": {
+                    "description": "Always | IfNotPresent | Never",
+                    "type": "string"
+                },
+                "livenessProbe": {
+                    "description": "Survival probes",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_internal_model_req.ContainerProbe"
+                        }
+                    ]
+                },
+                "name": {
+                    "type": "string"
+                },
+                "ports": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_internal_model_req.ContainerPort"
+                    }
+                },
+                "privileged": {
+                    "description": "Whether to enable privileged mode (e.g. root)",
+                    "type": "boolean"
+                },
+                "readyProbe": {
+                    "description": "Readiness Probe",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_internal_model_req.ContainerProbe"
+                        }
+                    ]
+                },
+                "resources": {
+                    "description": "Container application quota",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_internal_model_req.Resource"
+                        }
+                    ]
+                },
+                "startUpProbe": {
+                    "description": "Start the probe",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_internal_model_req.ContainerProbe"
+                        }
+                    ]
+                },
+                "tty": {
+                    "type": "boolean"
+                },
+                "volumeMounts": {
+                    "description": "Mounted volumes",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_internal_model_req.VolumeMount"
+                    }
+                },
+                "workingDir": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_crazyfrankie_kube-ctl_internal_model_req.ContainerPort": {
+            "type": "object",
+            "properties": {
+                "containerPort": {
+                    "type": "integer"
+                },
+                "hostPort": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_crazyfrankie_kube-ctl_internal_model_req.ContainerProbe": {
+            "type": "object",
+            "properties": {
+                "command": {
+                    "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_internal_model_req.ProbeCommand"
+                },
+                "enable": {
+                    "description": "Whether to turn on the probe",
+                    "type": "boolean"
+                },
+                "failureThreshold": {
+                    "description": "Threshold number of probes to consider a probe failure",
+                    "type": "integer"
+                },
+                "httpGet": {
+                    "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_internal_model_req.ProbeHTTPGet"
+                },
+                "initialDelaySeconds": {
+                    "description": "Initialize for a number of seconds before starting the probe",
+                    "type": "integer"
+                },
+                "periodSeconds": {
+                    "description": "Probe after every few seconds",
+                    "type": "integer"
+                },
+                "successThreshold": {
+                    "description": "Threshold number of probes to consider a probe successful",
+                    "type": "integer"
+                },
+                "tcpSocket": {
+                    "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_internal_model_req.ProbeTcpSocket"
+                },
+                "timeoutSeconds": {
+                    "description": "Probe timeout time",
+                    "type": "integer"
+                },
+                "type": {
+                    "description": "Probe type: tcp | http | command",
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_crazyfrankie_kube-ctl_internal_model_req.DnsConfig": {
+            "type": "object",
+            "properties": {
+                "nameservers": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "github_com_crazyfrankie_kube-ctl_internal_model_req.EnvVar": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "refName": {
+                    "type": "string"
+                },
+                "type": {
+                    "description": "configMap | secret | default(k/v)",
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_crazyfrankie_kube-ctl_internal_model_req.EnvVarFromResource": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "prefix": {
+                    "type": "string"
+                },
+                "refType": {
+                    "description": "configMap | secret",
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_crazyfrankie_kube-ctl_internal_model_req.Item": {
+            "type": "object",
+            "properties": {
+                "key": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_crazyfrankie_kube-ctl_internal_model_req.Network": {
+            "type": "object",
+            "properties": {
+                "dnsConfig": {
+                    "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_internal_model_req.DnsConfig"
+                },
+                "dnsPolicy": {
+                    "type": "string"
+                },
+                "hostAliases": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_internal_model_req.Item"
+                    }
+                },
+                "hostName": {
+                    "type": "string"
+                },
+                "hostNetwork": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "github_com_crazyfrankie_kube-ctl_internal_model_req.NodeAffinityTermExpressions": {
+            "type": "object",
+            "properties": {
+                "key": {
+                    "type": "string"
+                },
+                "operator": {
+                    "$ref": "#/definitions/v1.NodeSelectorOperator"
+                },
+                "value": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_crazyfrankie_kube-ctl_internal_model_req.NodeScheduling": {
+            "type": "object",
+            "properties": {
+                "nodeAffinity": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_internal_model_req.NodeAffinityTermExpressions"
+                    }
+                },
+                "nodeName": {
+                    "type": "string"
+                },
+                "nodeSelector": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_internal_model_req.Item"
+                    }
+                },
+                "type": {
+                    "description": "nodeName | nodeSelector | nodeAffinity",
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_crazyfrankie_kube-ctl_internal_model_req.Pod": {
+            "type": "object",
+            "properties": {
+                "base": {
+                    "description": "base definition info",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_internal_model_req.Base"
+                        }
+                    ]
+                },
+                "containers": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_internal_model_req.Container"
+                    }
+                },
+                "initContainers": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_internal_model_req.Container"
+                    }
+                },
+                "network": {
+                    "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_internal_model_req.Network"
+                },
+                "nodeScheduling": {
+                    "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_internal_model_req.NodeScheduling"
+                },
+                "tolerations": {
+                    "description": "pod toleration params",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/v1.Toleration"
+                    }
+                },
+                "volume": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_internal_model_req.Volume"
+                    }
+                }
+            }
+        },
+        "github_com_crazyfrankie_kube-ctl_internal_model_req.ProbeCommand": {
+            "type": "object",
+            "properties": {
+                "command": {
+                    "description": "cat /test/test.txt",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "github_com_crazyfrankie_kube-ctl_internal_model_req.ProbeHTTPGet": {
+            "type": "object",
+            "properties": {
+                "headers": {
+                    "description": "http headers",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_internal_model_req.Item"
+                    }
+                },
+                "host": {
+                    "description": "If \"\", it's an in-pod request.",
+                    "type": "string"
+                },
+                "path": {
+                    "type": "string"
+                },
+                "port": {
+                    "type": "integer"
+                },
+                "scheme": {
+                    "description": "http | https",
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_crazyfrankie_kube-ctl_internal_model_req.ProbeTcpSocket": {
+            "type": "object",
+            "properties": {
+                "host": {
+                    "type": "string"
+                },
+                "port": {
+                    "type": "integer"
+                }
+            }
+        },
+        "github_com_crazyfrankie_kube-ctl_internal_model_req.Resource": {
+            "type": "object",
+            "properties": {
+                "CPULimit": {
+                    "type": "integer"
+                },
+                "CPUReq": {
+                    "description": "cpu m",
+                    "type": "integer"
+                },
+                "enable": {
+                    "description": "Whether to configure container quotas",
+                    "type": "boolean"
+                },
+                "memory": {
+                    "description": "memory mi",
+                    "type": "integer"
+                },
+                "memoryLimit": {
+                    "type": "integer"
+                }
+            }
+        },
+        "github_com_crazyfrankie_kube-ctl_internal_model_req.Secret": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_internal_model_req.Item"
+                    }
+                },
+                "labels": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_internal_model_req.Item"
+                    }
+                },
+                "name": {
+                    "type": "string"
+                },
+                "namespace": {
+                    "type": "string"
+                },
+                "type": {
+                    "description": "Opaque | kubernetes.io/dockerconfigjson",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/v1.SecretType"
+                        }
+                    ]
+                }
+            }
+        },
+        "github_com_crazyfrankie_kube-ctl_internal_model_req.UpdateLabelReq": {
+            "type": "object",
+            "properties": {
+                "labels": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_internal_model_req.Item"
+                    }
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_crazyfrankie_kube-ctl_internal_model_req.UpdateTaintReq": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "taints": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/v1.Taint"
+                    }
+                }
+            }
+        },
+        "github_com_crazyfrankie_kube-ctl_internal_model_req.Volume": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_crazyfrankie_kube-ctl_internal_model_req.VolumeMount": {
+            "type": "object",
+            "properties": {
+                "mountName": {
+                    "type": "string"
+                },
+                "mountPath": {
+                    "description": "Mounted volume -\u003e path in the corresponding container",
+                    "type": "string"
+                },
+                "readOnly": {
+                    "description": "Read-only or not",
+                    "type": "boolean"
+                }
+            }
+        },
+        "github_com_crazyfrankie_kube-ctl_internal_model_resp.ConfigMap": {
+            "type": "object",
+            "properties": {
+                "age": {
+                    "type": "integer"
+                },
+                "dataNum": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "namespace": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_crazyfrankie_kube-ctl_internal_model_resp.ConfigMapDetail": {
+            "type": "object",
+            "properties": {
+                "age": {
+                    "type": "integer"
+                },
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_internal_model_resp.Item"
+                    }
+                },
+                "dataNum": {
+                    "type": "integer"
+                },
+                "labels": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_internal_model_resp.Item"
+                    }
+                },
+                "name": {
+                    "type": "string"
+                },
+                "namespace": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_crazyfrankie_kube-ctl_internal_model_resp.Item": {
+            "type": "object",
+            "properties": {
+                "key": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_crazyfrankie_kube-ctl_internal_model_resp.Namespace": {
+            "type": "object",
+            "properties": {
+                "createTime": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_crazyfrankie_kube-ctl_internal_model_resp.NodeDetail": {
+            "type": "object",
+            "properties": {
+                "OSImage": {
+                    "type": "string"
+                },
+                "age": {
+                    "type": "integer"
+                },
+                "containerRuntime": {
+                    "type": "string"
+                },
+                "externalIP": {
+                    "type": "string"
+                },
+                "internalIP": {
+                    "type": "string"
+                },
+                "kernelVersion": {
+                    "type": "string"
+                },
+                "labels": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_internal_model_resp.Item"
+                    }
+                },
+                "name": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "taints": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/v1.Taint"
+                    }
+                },
+                "version": {
+                    "description": "kubelet version",
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_crazyfrankie_kube-ctl_internal_model_resp.NodeListItem": {
+            "type": "object",
+            "properties": {
+                "OSImage": {
+                    "type": "string"
+                },
+                "age": {
+                    "type": "integer"
+                },
+                "containerRuntime": {
+                    "type": "string"
+                },
+                "externalIP": {
+                    "type": "string"
+                },
+                "internalIP": {
+                    "type": "string"
+                },
+                "kernelVersion": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "version": {
+                    "description": "kubelet version",
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_crazyfrankie_kube-ctl_internal_model_resp.PodListItem": {
+            "type": "object",
+            "properties": {
+                "age": {
+                    "description": "Runtime",
+                    "type": "integer"
+                },
+                "ip": {
+                    "description": "Pod id",
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "node": {
+                    "description": "Which Node the Pod is dispatched to",
+                    "type": "string"
+                },
+                "ready": {
+                    "description": "0/1 | 1/1",
+                    "type": "string"
+                },
+                "restarts": {
+                    "description": "Number of restarts",
+                    "type": "integer"
+                },
+                "status": {
+                    "description": "Running | Error",
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_crazyfrankie_kube-ctl_internal_model_resp.Secret": {
+            "type": "object",
+            "properties": {
+                "age": {
+                    "type": "integer"
+                },
+                "dataNum": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "namespace": {
+                    "type": "string"
+                },
+                "type": {
+                    "$ref": "#/definitions/v1.SecretType"
+                }
+            }
+        },
+        "github_com_crazyfrankie_kube-ctl_internal_model_resp.SecretDetail": {
+            "type": "object",
+            "properties": {
+                "age": {
+                    "type": "integer"
+                },
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_internal_model_resp.Item"
+                    }
+                },
+                "dataNum": {
+                    "type": "integer"
+                },
+                "labels": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_crazyfrankie_kube-ctl_internal_model_resp.Item"
+                    }
+                },
+                "name": {
+                    "type": "string"
+                },
+                "namespace": {
+                    "type": "string"
+                },
+                "type": {
+                    "$ref": "#/definitions/v1.SecretType"
+                }
+            }
+        },
+        "github_com_crazyfrankie_kube-ctl_pkg_response.Response": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer"
+                },
+                "data": {},
+                "msg": {
+                    "type": "string"
+                }
+            }
+        },
+        "v1.NodeSelectorOperator": {
+            "type": "string",
+            "enum": [
+                "In",
+                "NotIn",
+                "Exists",
+                "DoesNotExist",
+                "Gt",
+                "Lt"
+            ],
+            "x-enum-varnames": [
+                "NodeSelectorOpIn",
+                "NodeSelectorOpNotIn",
+                "NodeSelectorOpExists",
+                "NodeSelectorOpDoesNotExist",
+                "NodeSelectorOpGt",
+                "NodeSelectorOpLt"
+            ]
+        },
+        "v1.SecretType": {
+            "type": "string",
+            "enum": [
+                "Opaque",
+                "kubernetes.io/service-account-token",
+                "kubernetes.io/dockercfg",
+                "kubernetes.io/dockerconfigjson",
+                "kubernetes.io/basic-auth",
+                "kubernetes.io/ssh-auth",
+                "kubernetes.io/tls",
+                "bootstrap.kubernetes.io/token"
+            ],
+            "x-enum-varnames": [
+                "SecretTypeOpaque",
+                "SecretTypeServiceAccountToken",
+                "SecretTypeDockercfg",
+                "SecretTypeDockerConfigJson",
+                "SecretTypeBasicAuth",
+                "SecretTypeSSHAuth",
+                "SecretTypeTLS",
+                "SecretTypeBootstrapToken"
+            ]
+        },
+        "v1.Taint": {
+            "type": "object",
+            "properties": {
+                "effect": {
+                    "description": "Required. The effect of the taint on pods\nthat do not tolerate the taint.\nValid effects are NoSchedule, PreferNoSchedule and NoExecute.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/v1.TaintEffect"
+                        }
+                    ]
+                },
+                "key": {
+                    "description": "Required. The taint key to be applied to a node.",
+                    "type": "string"
+                },
+                "timeAdded": {
+                    "description": "TimeAdded represents the time at which the taint was added.\nIt is only written for NoExecute taints.\n+optional",
+                    "type": "string"
+                },
+                "value": {
+                    "description": "The taint value corresponding to the taint key.\n+optional",
+                    "type": "string"
+                }
+            }
+        },
+        "v1.TaintEffect": {
+            "type": "string",
+            "enum": [
+                "NoSchedule",
+                "PreferNoSchedule",
+                "NoExecute"
+            ],
+            "x-enum-varnames": [
+                "TaintEffectNoSchedule",
+                "TaintEffectPreferNoSchedule",
+                "TaintEffectNoExecute"
+            ]
+        },
+        "v1.Toleration": {
+            "type": "object",
+            "properties": {
+                "effect": {
+                    "description": "Effect indicates the taint effect to match. Empty means match all taint effects.\nWhen specified, allowed values are NoSchedule, PreferNoSchedule and NoExecute.\n+optional",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/v1.TaintEffect"
+                        }
+                    ]
+                },
+                "key": {
+                    "description": "Key is the taint key that the toleration applies to. Empty means match all taint keys.\nIf the key is empty, operator must be Exists; this combination means to match all values and all keys.\n+optional",
+                    "type": "string"
+                },
+                "operator": {
+                    "description": "Operator represents a key's relationship to the value.\nValid operators are Exists and Equal. Defaults to Equal.\nExists is equivalent to wildcard for value, so that a pod can\ntolerate all taints of a particular category.\n+optional",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/v1.TolerationOperator"
+                        }
+                    ]
+                },
+                "tolerationSeconds": {
+                    "description": "TolerationSeconds represents the period of time the toleration (which must be\nof effect NoExecute, otherwise this field is ignored) tolerates the taint. By default,\nit is not set, which means tolerate the taint forever (do not evict). Zero and\nnegative values will be treated as 0 (evict immediately) by the system.\n+optional",
+                    "type": "integer"
+                },
+                "value": {
+                    "description": "Value is the taint value the toleration matches to.\nIf the operator is Exists, the value should be empty, otherwise just a regular string.\n+optional",
+                    "type": "string"
+                }
+            }
+        },
+        "v1.TolerationOperator": {
+            "type": "string",
+            "enum": [
+                "Exists",
+                "Equal"
+            ],
+            "x-enum-varnames": [
+                "TolerationOpExists",
+                "TolerationOpEqual"
+            ]
+        }
+    }
+}

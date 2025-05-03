@@ -361,8 +361,17 @@ export default {
           : [],
         env: Array.isArray(container.env) 
           ? container.env.map(env => ({
-              key: env.key || '',
-              value: env.value || ''
+              name: env.name || env.key || '', // Support both old key and new name format
+              value: env.value || '',
+              type: env.type || 'default',
+              refName: env.refName || ''
+            }))
+          : [],
+        envsFrom: Array.isArray(container.envsFrom) 
+          ? container.envsFrom.map(envFrom => ({
+              name: envFrom.name || '',
+              refType: envFrom.refType || 'configMap',
+              prefix: envFrom.prefix || ''
             }))
           : [],
         volumeMounts: Array.isArray(container.volumeMounts)
@@ -455,6 +464,7 @@ export default {
         imagePullPolicy: 'IfNotPresent',
         ports: [],
         env: [],
+        envsFrom: [],
         volumeMounts: [],
         resources: {
           enable: false,
