@@ -116,6 +116,90 @@
         </div>
         <div v-else class="empty-block">No volumes configured</div>
       </el-card>
+
+      <!-- Node Scheduling -->
+      <el-card class="box-card">
+        <div slot="header" class="clearfix">
+          <span>Node Scheduling</span>
+        </div>
+        <div v-if="podDetail.nodeScheduling">
+          <el-form label-width="140px" class="detail-form">
+            <el-form-item label="Schedule Type">
+              <el-tag type="primary">{{ formatScheduleType(podDetail.nodeScheduling.type) }}</el-tag>
+            </el-form-item>
+            
+            <!-- Specific Node -->
+            <el-form-item v-if="podDetail.nodeScheduling.type === 'nodeName'" label="Node Name">
+              <span>{{ podDetail.nodeScheduling.nodeName || '-' }}</span>
+            </el-form-item>
+            
+            <!-- Node Selector -->
+            <el-form-item v-if="podDetail.nodeScheduling.type === 'nodeSelector'" label="Node Selectors">
+              <template v-if="podDetail.nodeScheduling.nodeSelector && podDetail.nodeScheduling.nodeSelector.length">
+                <el-tag
+                  v-for="selector in podDetail.nodeScheduling.nodeSelector"
+                  :key="selector.key"
+                  type="success"
+                  class="detail-tag"
+                >
+                  {{ selector.key }}: {{ selector.value }}
+                </el-tag>
+              </template>
+              <span v-else>-</span>
+            </el-form-item>
+            
+            <!-- Node Affinity -->
+            <el-form-item v-if="podDetail.nodeScheduling.type === 'nodeAffinity'" label="Affinity Rules">
+              <template v-if="podDetail.nodeScheduling.nodeAffinity && podDetail.nodeScheduling.nodeAffinity.length">
+                <el-table :data="podDetail.nodeScheduling.nodeAffinity" border style="width: 100%">
+                  <el-table-column prop="key" label="Key" min-width="120" />
+                  <el-table-column prop="operator" label="Operator" min-width="120" />
+                  <el-table-column prop="value" label="Value" min-width="120">
+                    <template slot-scope="scope">
+                      {{ scope.row.value || '-' }}
+                    </template>
+                  </el-table-column>
+                </el-table>
+              </template>
+              <span v-else>-</span>
+            </el-form-item>
+          </el-form>
+        </div>
+        <div v-else class="empty-block">No node scheduling configured</div>
+      </el-card>
+      
+      <!-- Tolerations -->
+      <el-card class="box-card">
+        <div slot="header" class="clearfix">
+          <span>Tolerations</span>
+        </div>
+        <div v-if="podDetail.tolerations && podDetail.tolerations.length">
+          <el-table :data="podDetail.tolerations" border style="width: 100%">
+            <el-table-column prop="key" label="Key" min-width="120">
+              <template slot-scope="scope">
+                {{ scope.row.key || 'All Keys' }}
+              </template>
+            </el-table-column>
+            <el-table-column prop="operator" label="Operator" min-width="100" />
+            <el-table-column prop="value" label="Value" min-width="120">
+              <template slot-scope="scope">
+                {{ (scope.row.operator === 'Equal' ? scope.row.value : '-') || '-' }}
+              </template>
+            </el-table-column>
+            <el-table-column prop="effect" label="Effect" min-width="140">
+              <template slot-scope="scope">
+                {{ scope.row.effect || 'All Effects' }}
+              </template>
+            </el-table-column>
+            <el-table-column label="Toleration Seconds" min-width="150">
+              <template slot-scope="scope">
+                {{ scope.row.effect === 'NoExecute' && scope.row.tolerationSeconds ? scope.row.tolerationSeconds + 's' : '-' }}
+              </template>
+            </el-table-column>
+          </el-table>
+        </div>
+        <div v-else class="empty-block">No tolerations configured</div>
+      </el-card>
     </div>
   </div>
 </template>
@@ -199,6 +283,18 @@ export default {
       }
 
       return paths.length ? paths.join('\n') : '-'
+    },
+    formatScheduleType(type) {
+      switch (type) {
+        case 'nodeName':
+          return 'Specific Node'
+        case 'nodeSelector':
+          return 'Node Selector'
+        case 'nodeAffinity':
+          return 'Node Affinity'
+        default:
+          return '-'
+      }
     },
     goBack() {
       const { namespace } = this.$route.query

@@ -5,6 +5,8 @@ import app from './modules/app'
 import settings from './modules/settings'
 import user from './modules/user'
 import pod from './modules/pod'
+import node from './modules/node'
+import configmap from './modules/configmap'
 
 Vue.use(Vuex)
 
@@ -13,7 +15,9 @@ const store = new Vuex.Store({
     app,
     settings,
     user,
-    pod
+    pod,
+    node,
+    configmap
   },
   getters
 })

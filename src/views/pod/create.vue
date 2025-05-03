@@ -93,6 +93,99 @@
 
       <el-card class="box-card" style="margin-top: 20px">
         <div slot="header" class="clearfix">
+          <span>Node Scheduling</span>
+        </div>
+        <el-form-item label="Schedule Type" prop="nodeScheduling.type">
+          <el-radio-group v-model="podForm.nodeScheduling.type">
+            <el-radio label="nodeName">Specific Node</el-radio>
+            <el-radio label="nodeSelector">Node Selector</el-radio>
+            <el-radio label="nodeAffinity">Node Affinity</el-radio>
+          </el-radio-group>
+        </el-form-item>
+
+        <!-- Specific Node Selection -->
+        <el-form-item v-if="podForm.nodeScheduling.type === 'nodeName'" label="Node Name">
+          <el-input v-model="podForm.nodeScheduling.nodeName" placeholder="Enter node name" />
+        </el-form-item>
+
+        <!-- Node Selector -->
+        <template v-if="podForm.nodeScheduling.type === 'nodeSelector'">
+          <el-form-item label="Node Labels">
+            <el-button size="small" type="primary" @click="addNodeSelector">Add Label Selector</el-button>
+            <div v-for="(selector, index) in podForm.nodeScheduling.nodeSelector" :key="index" style="margin-top: 10px">
+              <el-input v-model="selector.key" placeholder="Label Key" style="width: 200px" />
+              <el-input v-model="selector.value" placeholder="Label Value" style="width: 200px; margin: 0 10px" />
+              <el-button type="danger" size="small" @click="removeNodeSelector(index)">Delete</el-button>
+            </div>
+          </el-form-item>
+        </template>
+
+        <!-- Node Affinity -->
+        <template v-if="podForm.nodeScheduling.type === 'nodeAffinity'">
+          <el-form-item label="Affinity Rules">
+            <el-button size="small" type="primary" @click="addNodeAffinity">Add Affinity Rule</el-button>
+            <div v-for="(rule, index) in podForm.nodeScheduling.nodeAffinity" :key="index" 
+                 class="affinity-item" style="margin-top: 10px; padding: 10px; border: 1px dashed #dcdfe6; border-radius: 4px;">
+              <el-input v-model="rule.key" placeholder="Label Key" style="width: 200px" />
+              <el-select v-model="rule.operator" placeholder="Operator" style="width: 150px; margin: 0 10px">
+                <el-option label="In" value="In" />
+                <el-option label="NotIn" value="NotIn" />
+                <el-option label="Exists" value="Exists" />
+                <el-option label="DoesNotExist" value="DoesNotExist" />
+                <el-option label="Gt" value="Gt" />
+                <el-option label="Lt" value="Lt" />
+              </el-select>
+              <el-input v-if="['In', 'NotIn', 'Gt', 'Lt'].includes(rule.operator)" 
+                      v-model="rule.value" 
+                      placeholder="Value" 
+                      style="width: 200px" />
+              <el-button type="danger" size="small" @click="removeNodeAffinity(index)" style="margin-left: 10px">Delete</el-button>
+            </div>
+          </el-form-item>
+        </template>
+      </el-card>
+
+      <el-card class="box-card" style="margin-top: 20px">
+        <div slot="header" class="clearfix">
+          <span>Tolerations</span>
+          <el-button style="float: right" type="primary" size="small" @click="addToleration">Add Toleration</el-button>
+        </div>
+        <div v-if="podForm.tolerations.length === 0" class="empty-hint">
+          No tolerations configured. Add tolerations to allow this Pod to be scheduled onto nodes with matching taints.
+        </div>
+        <div v-for="(toleration, index) in podForm.tolerations" :key="index" 
+             class="toleration-item" style="margin-bottom: 15px; padding: 15px; border: 1px dashed #dcdfe6; border-radius: 4px;">
+          <el-form-item label="Key">
+            <el-input v-model="toleration.key" placeholder="Taint Key (empty for all keys)" style="width: 100%" />
+          </el-form-item>
+          <el-form-item label="Operator">
+            <el-select v-model="toleration.operator" placeholder="Select operator" style="width: 100%">
+              <el-option label="Equal" value="Equal" />
+              <el-option label="Exists" value="Exists" />
+            </el-select>
+          </el-form-item>
+          <el-form-item v-if="toleration.operator === 'Equal'" label="Value">
+            <el-input v-model="toleration.value" placeholder="Taint Value" style="width: 100%" />
+          </el-form-item>
+          <el-form-item label="Effect">
+            <el-select v-model="toleration.effect" placeholder="Select effect (empty for all effects)" style="width: 100%">
+              <el-option label="All Effects" value="" />
+              <el-option label="NoSchedule" value="NoSchedule" />
+              <el-option label="PreferNoSchedule" value="PreferNoSchedule" />
+              <el-option label="NoExecute" value="NoExecute" />
+            </el-select>
+          </el-form-item>
+          <el-form-item v-if="toleration.effect === 'NoExecute'" label="Toleration Seconds">
+            <el-input-number v-model="toleration.tolerationSeconds" :min="0" placeholder="Toleration duration in seconds" style="width: 100%" />
+          </el-form-item>
+          <div style="text-align: right">
+            <el-button type="danger" size="small" @click="removeToleration(index)">Delete Toleration</el-button>
+          </div>
+        </div>
+      </el-card>
+
+      <el-card class="box-card" style="margin-top: 20px">
+        <div slot="header" class="clearfix">
           <span>Container Configuration</span>
         </div>
         <div class="container-section">
@@ -155,7 +248,14 @@ export default {
         },
         initContainers: [],
         containers: [],
-        volume: []
+        volume: [],
+        tolerations: [],
+        nodeScheduling: {
+          type: 'nodeName', // nodeName | nodeSelector | nodeAffinity
+          nodeName: '',
+          nodeSelector: [],
+          nodeAffinity: []
+        }
       }
     }
   },
@@ -219,7 +319,20 @@ export default {
               : [],
             volume: Array.isArray(podData.volume)
               ? [...podData.volume]
-              : []
+              : [],
+            tolerations: Array.isArray(podData.tolerations)
+              ? [...podData.tolerations]
+              : [],
+            nodeScheduling: {
+              type: podData.nodeScheduling?.type || 'nodeName',
+              nodeName: podData.nodeScheduling?.nodeName || '',
+              nodeSelector: Array.isArray(podData.nodeScheduling?.nodeSelector)
+                ? [...podData.nodeScheduling.nodeSelector]
+                : [],
+              nodeAffinity: Array.isArray(podData.nodeScheduling?.nodeAffinity)
+                ? [...podData.nodeScheduling.nodeAffinity]
+                : []
+            }
           }
         } catch (error) {
           console.error('Error fetching Pod details:', error)
@@ -363,6 +476,30 @@ export default {
       } else {
         this.podForm.containers.splice(index, 1)
       }
+    },
+    addNodeSelector() {
+      this.podForm.nodeScheduling.nodeSelector.push({ key: '', value: '' })
+    },
+    removeNodeSelector(index) {
+      this.podForm.nodeScheduling.nodeSelector.splice(index, 1)
+    },
+    addNodeAffinity() {
+      this.podForm.nodeScheduling.nodeAffinity.push({ key: '', operator: 'In', value: '' })
+    },
+    removeNodeAffinity(index) {
+      this.podForm.nodeScheduling.nodeAffinity.splice(index, 1)
+    },
+    addToleration() {
+      this.podForm.tolerations.push({
+        key: '',
+        operator: 'Equal',
+        value: '',
+        effect: '',
+        tolerationSeconds: null
+      })
+    },
+    removeToleration(index) {
+      this.podForm.tolerations.splice(index, 1)
     },
     async submitForm() {
       try {
