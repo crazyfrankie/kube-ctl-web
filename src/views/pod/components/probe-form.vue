@@ -153,7 +153,7 @@ export default {
       handler(val) {
         const result = { ...val }
         delete result.type
-        // 根据类型只保留相关配置
+        // Only keep relevant configurations based on the type
         if (val.type !== 'exec') delete result.exec
         if (val.type !== 'httpGet') delete result.httpGet
         if (val.type !== 'tcpSocket') delete result.tcpSocket

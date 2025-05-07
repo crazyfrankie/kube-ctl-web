@@ -37,7 +37,7 @@
       <el-table-column label="Data Count" prop="dataCount" />
       <el-table-column label="Created">
         <template slot-scope="{row}">
-          <span>{{ formatTime(row.age) }}</span>
+          <span>{{ formatKubeTimestamp(row.age) }}</span>
         </template>
       </el-table-column>
       <el-table-column label="Actions" width="200">
@@ -57,6 +57,7 @@
 <script>
 import { mapState } from 'vuex'
 import { Message } from 'element-ui'
+import { formatKubeTimestamp } from '@/utils'
 
 export default {
   name: 'SecretList',
@@ -159,7 +160,8 @@ export default {
       if (seconds < 31536000) return `${Math.floor(seconds / 2592000)}mo`
       
       return `${Math.floor(seconds / 31536000)}y`
-    }
+    },
+    formatKubeTimestamp
   }
 }
 </script>

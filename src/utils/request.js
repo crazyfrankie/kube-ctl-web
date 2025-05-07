@@ -25,7 +25,7 @@ service.interceptors.response.use(
   response => {
     const res = response.data
 
-    // 这里可以根据您的后端API响应格式进行调整
+    // This can be adjusted according to your backend API response format
     if (res.code && res.code !== 20000) {
       Message({
         message: res.message || 'Error',
@@ -34,9 +34,9 @@ service.interceptors.response.use(
       })
 
       // if (res.code === 50008 || res.code === 50012 || res.code === 50014) {
-      //   MessageBox.confirm('您已经登出，请重新登录', '确认登出', {
-      //     confirmButtonText: '重新登录',
-      //     cancelButtonText: '取消',
+      //   MessageBox.confirm('You have been logged out, please log in again', 'Confirm logout', {
+      //     confirmButtonText: 'Login Again',
+      //     cancelButtonText: 'Cancel',
       //     type: 'warning'
       //   }).then(() => {
       //     store.dispatch('user/resetToken')

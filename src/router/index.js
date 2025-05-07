@@ -133,6 +133,32 @@ export const constantRoutes = [
         meta: {title: 'Secret', icon: 'secret', activeMenu: "/volume/secrets"},
         hidden: true,
       },
+      {
+        path: 'pvs',
+        name: 'PVs',
+        component: () => import('@/views/pv/index'),
+        meta: {title: 'PersistentVolume', icon: 'pv', activeMenu: "/volume/pvs"}
+      },
+      {
+        path: 'pv-create',
+        name: 'PVCreate',
+        component: () => import('@/views/pv/create'),
+        meta: {title: 'Create PersistentVolume', icon: 'pv', activeMenu: "/volume/pvs"},
+        hidden: true,
+      },
+      {
+        path: 'pvcs',
+        name: 'PVCs',
+        component: () => import('@/views/pvc/index'),
+        meta: {title: 'PersistentVolumeClaim', icon: 'pvc', activeMenu: "/volume/pvcs"}
+      },
+      {
+        path: 'pvc-create',
+        name: 'PVCCreate',
+        component: () => import('@/views/pvc/create'),
+        meta: {title: 'Create PersistentVolumeClaim', icon: 'pvc', activeMenu: "/volume/pvcs"},
+        hidden: true,
+      },
     ]
   },
   // 404 page must be placed at the end !!!

@@ -62,7 +62,7 @@
       </el-table-column>
       <el-table-column label="Created" width="150">
         <template slot-scope="{row}">
-          <span>{{ formatTime(row.age) }}</span>
+          <span>{{ formatKubeTimestamp(row.age) }}</span>
         </template>
       </el-table-column>
       <el-table-column label="Actions" width="160" fixed="right">
@@ -82,6 +82,7 @@
 <script>
 import { mapState } from 'vuex'
 import { Message } from 'element-ui'
+import { formatKubeTimestamp } from '@/utils'
 
 export default {
   name: 'ConfigMapList',
@@ -177,19 +178,7 @@ export default {
         this.listLoading = false
       }
     },
-    formatTime(timestamp) {
-      if (!timestamp) return '-'
-      
-      const seconds = timestamp
-      
-      if (seconds < 60) return `${seconds}s`
-      if (seconds < 3600) return `${Math.floor(seconds / 60)}m`
-      if (seconds < 86400) return `${Math.floor(seconds / 3600)}h`
-      if (seconds < 2592000) return `${Math.floor(seconds / 86400)}d`
-      if (seconds < 31536000) return `${Math.floor(seconds / 2592000)}mo`
-      
-      return `${Math.floor(seconds / 31536000)}y`
-    }
+    formatKubeTimestamp
   }
 }
 </script>

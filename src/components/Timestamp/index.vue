@@ -15,28 +15,25 @@ export default {
     formattedTime() {
       if (!this.data) return '-'
       
-      // 将Unix时间戳（秒）转换为毫秒
-      const timeInMs = typeof this.data === 'string' ? 
-        parseInt(this.data) * 1000 : 
-        Number(this.data) * 1000
+      // Convert timestamp (seconds) to time ago format
+      const timestamp = typeof this.data === 'string' ? 
+        parseInt(this.data) : Number(this.data)
       
-      if (isNaN(timeInMs)) return '-'
+      if (isNaN(timestamp)) return '-'
       
-      const time = new Date(timeInMs)
-      const now = new Date()
-      const diff = now - time
+      // Calculate difference in seconds
+      const now = Math.floor(Date.now() / 1000)
+      const seconds = now - timestamp
       
-      const seconds = Math.floor(diff / 1000)
-      const minutes = Math.floor(seconds / 60)
-      const hours = Math.floor(minutes / 60)
-      const days = Math.floor(hours / 24)
-      const weeks = Math.floor(days / 7)
+      if (seconds < 0) return '-' // Future timestamp, shouldn't happen
       
-      if (weeks > 0) return `${weeks}w`
-      if (days > 0) return `${days}d`
-      if (hours > 0) return `${hours}h`
-      if (minutes > 0) return `${minutes}m`
-      return seconds <= 0 ? '0s' : `${seconds}s`
+      if (seconds < 60) return `${seconds}s`
+      if (seconds < 3600) return `${Math.floor(seconds / 60)}m`
+      if (seconds < 86400) return `${Math.floor(seconds / 3600)}h`
+      if (seconds < 2592000) return `${Math.floor(seconds / 86400)}d`
+      if (seconds < 31536000) return `${Math.floor(seconds / 2592000)}mo`
+      
+      return `${Math.floor(seconds / 31536000)}y`
     }
   }
 }

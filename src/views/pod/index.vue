@@ -70,6 +70,7 @@
 import { mapState } from 'vuex'
 import Timestamp from '@/components/Timestamp'
 import { Message } from 'element-ui'
+import { formatKubeTimestamp } from '@/utils'
 
 export default {
   name: 'PodIndex',
@@ -251,6 +252,9 @@ export default {
         'Terminating': 'warning'
       }
       return statusMap[status] || 'info'
+    },
+    formatTime(timestamp) {
+      return formatKubeTimestamp(timestamp)
     }
   }
 }

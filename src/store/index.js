@@ -8,6 +8,8 @@ import pod from './modules/pod'
 import node from './modules/node'
 import configmap from './modules/configmap'
 import secret from './modules/secret'
+import pv from './modules/pv'
+import pvc from './modules/pvc'
 
 Vue.use(Vuex)
 
@@ -19,7 +21,9 @@ const store = new Vuex.Store({
     pod,
     node,
     configmap,
-    secret
+    secret,
+    pv,
+    pvc
   },
   getters
 })

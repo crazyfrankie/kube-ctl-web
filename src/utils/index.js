@@ -45,7 +45,7 @@ export function parseTime(time, cFormat) {
   const time_str = format.replace(/{([ymdhisa])+}/g, (result, key) => {
     const value = formatObj[key]
     // Note: getDay() returns 0 on Sunday
-    if (key === 'a') { return ['日', '一', '二', '三', '四', '五', '六'][value ] }
+    if (key === 'a') { return ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][value ] }
     return value.toString().padStart(2, '0')
   })
   return time_str
@@ -68,14 +68,14 @@ export function formatTime(time, option) {
   const diff = (now - d) / 1000
 
   if (diff < 30) {
-    return '刚刚'
+    return 'Just now'
   } else if (diff < 3600) {
     // less 1 hour
-    return Math.ceil(diff / 60) + '分钟前'
+    return Math.ceil(diff / 60) + ' minutes ago'
   } else if (diff < 3600 * 24) {
-    return Math.ceil(diff / 3600) + '小时前'
+    return Math.ceil(diff / 3600) + ' hours ago'
   } else if (diff < 3600 * 24 * 2) {
-    return '1天前'
+    return '1 day ago'
   }
   if (option) {
     return parseTime(time, option)
@@ -83,15 +83,37 @@ export function formatTime(time, option) {
     return (
       d.getMonth() +
       1 +
-      '月' +
+      '/' +
       d.getDate() +
-      '日' +
+      ' ' +
       d.getHours() +
-      '时' +
-      d.getMinutes() +
-      '分'
+      ':' +
+      d.getMinutes()
     )
   }
+}
+
+/**
+ * Format Kubernetes timestamp to human-readable age string
+ * @param {number} timestamp - Unix timestamp in seconds
+ * @returns {string} - Human-readable age (e.g. "3d", "5h")
+ */
+export function formatKubeTimestamp(timestamp) {
+  if (!timestamp) return '-'
+  
+  // Convert timestamp to seconds ago
+  const now = Math.floor(Date.now() / 1000)
+  const seconds = now - timestamp
+  
+  if (seconds < 0) return '-' // Future timestamp, shouldn't happen
+  
+  if (seconds < 60) return `${seconds}s`
+  if (seconds < 3600) return `${Math.floor(seconds / 60)}m`
+  if (seconds < 86400) return `${Math.floor(seconds / 3600)}h`
+  if (seconds < 2592000) return `${Math.floor(seconds / 86400)}d`
+  if (seconds < 31536000) return `${Math.floor(seconds / 2592000)}mo`
+  
+  return `${Math.floor(seconds / 31536000)}y`
 }
 
 /**
