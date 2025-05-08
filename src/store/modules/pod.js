@@ -1,9 +1,11 @@
 import { createPod, getPodList, searchPod, getPodDetail, deletePod, getNamespaces } from '@/api/pod'
+import { getPVCList } from '@/api/pvc'
 
 const state = {
   podName: '',
   currentPod: null,
-  namespaces: []
+  namespaces: [],
+  pvcList: []
 }
 
 const mutations = {
@@ -15,6 +17,9 @@ const mutations = {
   },
   SET_NAMESPACES: (state, namespaces) => {
     state.namespaces = namespaces
+  },
+  SET_PVC_LIST: (state, pvcList) => {
+    state.pvcList = pvcList
   }
 }
 
@@ -94,6 +99,18 @@ const actions = {
 
   setPodName({ commit }, name) {
     commit('SET_POD_NAME', name)
+  },
+
+  // Get PVC list for current namespace
+  async getPVCsForNamespace({ commit }, namespace) {
+    try {
+      const response = await getPVCList(namespace)
+      commit('SET_PVC_LIST', response.data || [])
+      return response
+    } catch (error) {
+      console.error('Failed to fetch PVCs:', error)
+      throw error
+    }
   }
 }
 

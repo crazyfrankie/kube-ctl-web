@@ -27,8 +27,8 @@ const actions = {
   async createPVC({ dispatch }, data) {
     try {
       const response = await createPVC(data)
-      // Refresh the PVC list after creating
-      await dispatch('getPVCList', data.metadata.namespace)
+      // 修正命名空间路径，直接使用 data.namespace 而不是 data.metadata.namespace
+      await dispatch('getPVCList', data.namespace)
       return response
     } catch (error) {
       console.error('Failed to create PVC:', error)

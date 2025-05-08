@@ -79,15 +79,92 @@
           <el-button style="float: right" type="primary" size="small" @click="addVolume">Add Volume</el-button>
         </div>
         <div v-for="(vol, index) in podForm.volume" :key="index" class="volume-item">
-          <el-form-item :label="'Volume ' + (index + 1)">
-            <el-input v-model="vol.name" placeholder="Name" style="width: 200px" />
-            <el-select v-model="vol.type" placeholder="Type" style="width: 200px; margin: 0 10px">
-              <el-option label="emptyDir" value="emptyDir" />
-              <el-option label="hostPath" value="hostPath" />
-              <el-option label="configMap" value="configMap" />
+          <el-form-item :label="'Volume ' + (index + 1)" style="margin-bottom: 15px;">
+            <el-input v-model="vol.name" placeholder="Volume Name" style="width: 200px" />
+            <el-select v-model="vol.type" placeholder="Volume Type" style="width: 200px; margin: 0 10px">
+              <el-option label="Empty Directory" value="emptyDir" />
+              <el-option label="Host Path" value="hostPath" />
+              <el-option label="ConfigMap" value="configMap" />
+              <el-option label="Secret" value="secret" />
+              <el-option label="PersistentVolumeClaim" value="pvc" />
+              <el-option label="Downward API" value="downward" />
             </el-select>
             <el-button type="danger" size="small" @click="removeVolume(index)">Delete</el-button>
           </el-form-item>
+          
+          <!-- Volume type specific configuration -->
+          <div class="volume-config" style="padding-left: 120px; margin-bottom: 15px;">
+            <!-- Host Path Volume -->
+            <template v-if="vol.type === 'hostPath'">
+              <el-form-item label="Path" label-width="80px">
+                <el-input v-model="vol.hostPathVolume.path" placeholder="Path on the host" style="width: 400px" />
+              </el-form-item>
+              <el-form-item label="Type" label-width="80px">
+                <el-select v-model="vol.hostPathVolume.type" placeholder="Host Path Type" style="width: 400px">
+                  <el-option label="Directory" value="Directory" />
+                  <el-option label="DirectoryOrCreate" value="DirectoryOrCreate" />
+                  <el-option label="File" value="File" />
+                  <el-option label="FileOrCreate" value="FileOrCreate" />
+                  <el-option label="Socket" value="Socket" />
+                  <el-option label="CharDevice" value="CharDevice" />
+                  <el-option label="BlockDevice" value="BlockDevice" />
+                </el-select>
+              </el-form-item>
+            </template>
+            
+            <!-- ConfigMap Volume -->
+            <template v-if="vol.type === 'configMap'">
+              <el-form-item label="Name" label-width="80px">
+                <el-input v-model="vol.configMapRefVolume.name" placeholder="ConfigMap Name" style="width: 400px" />
+              </el-form-item>
+              <el-form-item label="Optional" label-width="80px">
+                <el-switch v-model="vol.configMapRefVolume.optional" />
+              </el-form-item>
+            </template>
+            
+            <!-- Secret Volume -->
+            <template v-if="vol.type === 'secret'">
+              <el-form-item label="Name" label-width="80px">
+                <el-input v-model="vol.secretRefVolume.name" placeholder="Secret Name" style="width: 400px" />
+              </el-form-item>
+              <el-form-item label="Optional" label-width="80px">
+                <el-switch v-model="vol.secretRefVolume.optional" />
+              </el-form-item>
+            </template>
+            
+            <!-- PersistentVolumeClaim Volume -->
+            <template v-if="vol.type === 'pvc'">
+              <el-form-item label="Claim Name" label-width="80px">
+                <el-select v-model="vol.PVCVolume.claimName" placeholder="Select PVC" style="width: 400px" filterable>
+                  <el-option 
+                    v-for="pvc in pvcList" 
+                    :key="pvc.name" 
+                    :label="pvc.name" 
+                    :value="pvc.name">
+                    <span style="float: left">{{ pvc.name }}</span>
+                    <span style="float: right; color: #8492a6; font-size: 13px">{{ pvc.capacity }}</span>
+                  </el-option>
+                </el-select>
+              </el-form-item>
+            </template>
+            
+            <!-- Downward API Volume -->
+            <template v-if="vol.type === 'downward'">
+              <el-button size="small" type="primary" @click="addDownwardAPIItem(index)" style="margin-left: 80px;">Add Field Reference</el-button>
+              <div v-for="(item, itemIndex) in vol.downwardAPIVolume.items" :key="'downward-'+index+'-'+itemIndex" style="margin-top: 10px; padding-left: 80px;">
+                <el-form-item label="Path" label-width="80px">
+                  <el-input v-model="item.path" placeholder="Path (e.g. labels/app)" style="width: 200px" />
+                </el-form-item>
+                <el-form-item label="Field Path" label-width="80px">
+                  <el-input v-model="item.fieldPath" placeholder="Field Path (e.g. metadata.labels.app)" style="width: 300px" />
+                </el-form-item>
+                <el-button type="danger" size="small" @click="removeDownwardAPIItem(index, itemIndex)">Delete</el-button>
+              </div>
+            </template>
+          </div>
+        </div>
+        <div v-if="podForm.volume.length === 0" class="empty-hint" style="color: #909399; padding: 20px 0; text-align: center;">
+          No volumes configured. Add volumes to share data between containers or with the host.
         </div>
       </el-card>
 
@@ -261,11 +338,36 @@ export default {
   },
   computed: {
     ...mapState({
-      namespaces: state => state.pod.namespaces
+      namespaces: state => state.pod.namespaces,
+      pvcList: state => state.pod.pvcList
     })
   },
   created() {
     this.init()
+  },
+  watch: {
+    'podForm.base.namespace': {
+      handler(newNamespace) {
+        if (newNamespace) {
+          // 当命名空间改变时，加载该命名空间的 PVC 列表
+          this.loadPVCsForNamespace(newNamespace)
+        }
+      },
+      immediate: true
+    },
+    'podForm.volume': {
+      handler(volumes) {
+        // 监听卷数组的变化
+        if (volumes && volumes.length > 0) {
+          const pvcTypeVolumeExists = volumes.some(vol => vol.type === 'pvc')
+          // 如果有 PVC 类型的卷且 PVC 列表还未加载，则加载 PVC 列表
+          if (pvcTypeVolumeExists && this.pvcList.length === 0 && this.podForm.base.namespace) {
+            this.loadPVCsForNamespace(this.podForm.base.namespace)
+          }
+        }
+      },
+      deep: true
+    }
   },
   methods: {
     async initNamespace() {
@@ -452,10 +554,28 @@ export default {
       this.podForm.network.hostAliases.splice(index, 1)
     },
     addVolume() {
-      this.podForm.volume.push({ name: '', type: 'emptyDir' })
+      this.podForm.volume.push({
+        name: '',
+        type: 'emptyDir',
+        // 预初始化各类型卷的配置
+        hostPathVolume: { path: '', type: 'Directory' },
+        configMapRefVolume: { name: '', optional: false },
+        secretRefVolume: { name: '', optional: false },
+        PVCVolume: { claimName: '' },
+        downwardAPIVolume: { items: [] }
+      })
     },
     removeVolume(index) {
       this.podForm.volume.splice(index, 1)
+    },
+    addDownwardAPIItem(volumeIndex) {
+      if (!this.podForm.volume[volumeIndex].downwardAPIVolume) {
+        this.podForm.volume[volumeIndex].downwardAPIVolume = { items: [] }
+      }
+      this.podForm.volume[volumeIndex].downwardAPIVolume.items.push({ path: '', fieldPath: '' })
+    },
+    removeDownwardAPIItem(volumeIndex, itemIndex) {
+      this.podForm.volume[volumeIndex].downwardAPIVolume.items.splice(itemIndex, 1)
     },
     addContainer(type) {
       const container = {
@@ -525,6 +645,14 @@ export default {
         path: '/pod/list',
         query: { namespace: this.podForm.base.namespace }
       })
+    },
+    async loadPVCsForNamespace(namespace) {
+      try {
+        await this.$store.dispatch('pod/getPVCsForNamespace', namespace)
+      } catch (error) {
+        console.error('Failed to fetch PVC list:', error)
+        Message.error('Failed to fetch PVC list')
+      }
     }
   }
 }

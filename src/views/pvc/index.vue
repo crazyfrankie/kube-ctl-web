@@ -159,6 +159,8 @@ export default {
           name: row.name
         })
         Message.success('Deleted successfully')
+        // 确保删除后刷新列表
+        await this.getPVCList()
       } catch (error) {
         if (error !== 'cancel') {
           Message.error('Failed to delete PVC')

@@ -159,6 +159,19 @@ export const constantRoutes = [
         meta: {title: 'Create PersistentVolumeClaim', icon: 'pvc', activeMenu: "/volume/pvcs"},
         hidden: true,
       },
+      {
+        path: 'storageclasses',
+        name: 'StorageClasses',
+        component: () => import('@/views/storageclass/index'),
+        meta: {title: 'StorageClass', icon: 'storage', activeMenu: "/volume/storageclasses"}
+      },
+      {
+        path: 'storageclass-create',
+        name: 'StorageClassCreate',
+        component: () => import('@/views/storageclass/create'),
+        meta: {title: 'Create StorageClass', icon: 'storage', activeMenu: "/volume/storageclasses"},
+        hidden: true,
+      },
     ]
   },
   // 404 page must be placed at the end !!!

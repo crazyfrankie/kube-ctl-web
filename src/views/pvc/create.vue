@@ -59,6 +59,13 @@
           <el-input v-model="form.volumeName" placeholder="Optional: bind to a specific PV"></el-input>
         </el-form-item>
 
+        <el-form-item label="Selector">
+          <dynamic-item v-model="form.selector" item-key="key" item-value="value"></dynamic-item>
+          <div class="help-text" style="font-size: 12px; color: #909399; margin-top: 5px;">
+            Optional: Select PersistentVolumes with matching labels
+          </div>
+        </el-form-item>
+
         <el-form-item label="Labels">
           <dynamic-item v-model="form.labels" item-key="key" item-value="value"></dynamic-item>
         </el-form-item>
@@ -93,7 +100,8 @@ export default {
         storageClass: '',
         volumeMode: 'Filesystem',
         volumeName: '',
-        labels: []
+        labels: [],
+        selector: []
       },
       rules: {
         name: [
@@ -131,7 +139,7 @@ export default {
         await this.$store.dispatch('pod/getNamespaces')
         if (this.namespaces.length > 0) {
           const urlNamespace = this.$route.query.namespace
-          this.currentNamespace = urlNamespace || this.namespaces[0]
+          this.currentNamespace = urlNamespace || this.namespaces[0].name
           this.form.namespace = this.currentNamespace
         }
       } catch (error) {
@@ -140,7 +148,10 @@ export default {
       }
     },
     goBack() {
-      this.$router.push('/volume/pvcs')
+      this.$router.push({
+        path: '/volume/pvcs',
+        query: { namespace: this.currentNamespace }
+      })
     },
     
     async onSubmit() {
@@ -149,26 +160,17 @@ export default {
         
         this.submitting = true
         
+        // 根据 swagger.json 中的定义构建 PVC 数据
         const pvcData = {
-          metadata: {
-            name: this.form.name,
-            namespace: this.currentNamespace
-          },
-          spec: {
-            accessModes: this.form.accessModes,
-            resources: {
-              requests: {
-                storage: `${this.form.capacityValue}${this.form.capacityUnit}`
-              }
-            },
-            storageClassName: this.form.storageClass || null,
-            volumeMode: this.form.volumeMode,
-            volumeName: this.form.volumeName || '',
-            labels: this.form.labels.length > 0 ? this.form.labels.reduce((acc, item) => {
-              acc[item.key] = item.value;
-              return acc;
-            }, {}) : {}
-          }
+          name: this.form.name,
+          namespace: this.currentNamespace,
+          capacity: `${this.form.capacityValue}${this.form.capacityUnit}`,
+          accessModes: this.form.accessModes,
+          storageClassName: this.form.storageClass || '',
+          // selector 是一个标签数组，按照 Item 结构
+          selector: this.form.selector,
+          // labels 是一个标签数组，按照 Item 结构
+          labels: this.form.labels
         }
         
         await this.$store.dispatch('pvc/createPVC', pvcData)
