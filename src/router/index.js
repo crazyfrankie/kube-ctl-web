@@ -127,14 +127,27 @@ export const constantRoutes = [
         component: () => import('@/views/service/edit'),
         meta: {title: 'Create Service', icon: 'service', activeMenu: "/network/services"},
         hidden: true
+      },
+      {
+        path: 'ingresses',
+        name: 'Ingresses',
+        component: () => import('@/views/ingress/index'),
+        meta: {title: 'Ingresses', icon: 'ingress'}
+      },
+      {
+        path: 'ingress-edit',
+        name: 'IngressEdit',
+        component: () => import('@/views/ingress/edit'),
+        meta: {title: 'Edit Ingress', icon: 'ingress', activeMenu: "/network/ingresses"},
+        hidden: true
+      },
+      {
+        path: 'ingress-create',
+        name: 'IngressCreate',
+        component: () => import('@/views/ingress/edit'),
+        meta: {title: 'Create Ingress', icon: 'ingress', activeMenu: "/network/ingresses"},
+        hidden: true
       }
-      // Future routes like 'ingresses' would be added here as:
-      // {
-      //   path: 'ingresses',
-      //   name: 'Ingresses',
-      //   component: () => import('@/views/ingress/index'),
-      //   meta: {title: 'Ingress', icon: 'ingress'}
-      // }
     ]
   },
   {

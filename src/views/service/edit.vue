@@ -81,13 +81,14 @@
               <el-form-item 
                 :label="index === 0 ? 'Node Port' : ''" 
                 :prop="'ports.' + index + '.nodePort'">
-                <el-input-number 
-                  v-model="port.nodePort" 
-                  :min="30000" 
-                  :max="32767"
-                  :disabled="form.type !== 'NodePort' && form.type !== 'LoadBalancer'" 
-                  placeholder="Node port">
-                </el-input-number>
+                <el-tooltip content="Valid range: 30000-32767" placement="top" effect="light">
+                  <el-input-number 
+                    v-model="port.nodePort" 
+                    :min="30000" 
+                    :max="32767"
+                    placeholder="Node port">
+                  </el-input-number>
+                </el-tooltip>
               </el-form-item>
             </el-col>
             <el-col :span="3" style="display: flex; align-items: center;">

@@ -12,6 +12,7 @@ import pv from './modules/pv'
 import pvc from './modules/pvc'
 import storageclass from './modules/storageclass'
 import service from './modules/service'
+import ingress from './modules/ingress'
 
 Vue.use(Vuex)
 
@@ -27,7 +28,8 @@ const store = new Vuex.Store({
     pv,
     pvc,
     storageclass,
-    service
+    service,
+    ingress
   },
   getters
 })
