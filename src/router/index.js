@@ -49,7 +49,7 @@ export const constantRoutes = [
   {
     path: '/node',
     component: Layout,
-    redirect: '/node/nodes',
+    redirect: '/node/list',
     name: 'Node',
     meta: {title: 'Node Management', icon: 'node'},
     children: [
@@ -101,17 +101,54 @@ export const constantRoutes = [
     ]
   },
   {
+    path: '/network',
+    component: Layout,
+    redirect: '/network/services',
+    name: 'Network',
+    meta: {title: 'Service Discovery', icon: 'link'},
+    alwaysShow: true, // Always show the root menu
+    children: [
+      {
+        path: 'services',
+        name: 'Services',
+        component: () => import('@/views/service/index'),
+        meta: {title: 'Services', icon: 'service'}
+      },
+      {
+        path: 'service-edit',
+        name: 'ServiceEdit',
+        component: () => import('@/views/service/edit'),
+        meta: {title: 'Edit Service', icon: 'service', activeMenu: "/network/services"},
+        hidden: true
+      },
+      {
+        path: 'service-create',
+        name: 'ServiceCreate',
+        component: () => import('@/views/service/edit'),
+        meta: {title: 'Create Service', icon: 'service', activeMenu: "/network/services"},
+        hidden: true
+      }
+      // Future routes like 'ingresses' would be added here as:
+      // {
+      //   path: 'ingresses',
+      //   name: 'Ingresses',
+      //   component: () => import('@/views/ingress/index'),
+      //   meta: {title: 'Ingress', icon: 'ingress'}
+      // }
+    ]
+  },
+  {
     path: '/volume',
     component: Layout,
     redirect: '/volume/configmaps',
-    name: 'ConfigMap',
-    meta: {title: 'Volume Management', icon: 'data'},
+    name: 'Volume',
+    meta: {title: 'Volume Management', icon: 'volume'},
     children: [
       {
         path: 'configmaps',
         name: 'ConfigMaps',
         component: () => import('@/views/configmap/index'),
-        meta: {title: 'ConfigMap', icon: 'cm', activeMenu: "/volume/configmaps"}
+        meta: {title: 'ConfigMap', icon: 'cm'}
       },
       {
         path: 'configmap-edit',
@@ -124,7 +161,7 @@ export const constantRoutes = [
         path: 'secrets',
         name: 'Secrets',
         component: () => import('@/views/secret/index'),
-        meta: {title: 'Secret', icon: 'secret', activeMenu: "/volume/secrets"}
+        meta: {title: 'Secret', icon: 'secret'}
       },
       {
         path: 'secret-edit',
@@ -137,7 +174,7 @@ export const constantRoutes = [
         path: 'pvs',
         name: 'PVs',
         component: () => import('@/views/pv/index'),
-        meta: {title: 'PersistentVolume', icon: 'pv', activeMenu: "/volume/pvs"}
+        meta: {title: 'PersistentVolume', icon: 'pv'}
       },
       {
         path: 'pv-create',
@@ -150,7 +187,7 @@ export const constantRoutes = [
         path: 'pvcs',
         name: 'PVCs',
         component: () => import('@/views/pvc/index'),
-        meta: {title: 'PersistentVolumeClaim', icon: 'pvc', activeMenu: "/volume/pvcs"}
+        meta: {title: 'PersistentVolumeClaim', icon: 'pvc'}
       },
       {
         path: 'pvc-create',
@@ -163,7 +200,7 @@ export const constantRoutes = [
         path: 'storageclasses',
         name: 'StorageClasses',
         component: () => import('@/views/storageclass/index'),
-        meta: {title: 'StorageClass', icon: 'storage', activeMenu: "/volume/storageclasses"}
+        meta: {title: 'StorageClass', icon: 'storage'}
       },
       {
         path: 'storageclass-create',

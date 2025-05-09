@@ -11,6 +11,7 @@ import secret from './modules/secret'
 import pv from './modules/pv'
 import pvc from './modules/pvc'
 import storageclass from './modules/storageclass'
+import service from './modules/service'
 
 Vue.use(Vuex)
 
@@ -25,7 +26,8 @@ const store = new Vuex.Store({
     secret,
     pv,
     pvc,
-    storageclass
+    storageclass,
+    service
   },
   getters
 })
