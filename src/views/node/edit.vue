@@ -331,24 +331,54 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  background: #f8fafc;
+  padding: 15px;
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
+
 .box-card {
   margin-bottom: 20px;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.05);
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
+  
+  ::v-deep .el-card__header {
+    background: #f8fafc;
+    padding: 15px 20px;
+    font-weight: 600;
+    font-size: 16px;
+    color: #303133;
+    border-bottom: 1px solid #ebeef5;
+  }
 }
+
 .button-container {
   margin-bottom: 15px;
   display: flex;
   justify-content: flex-start;
   gap: 10px;
+  padding: 10px;
+  background-color: #fafbfc;
+  border-radius: 4px;
+  border-left: 3px solid #409EFF;
 }
+
 .tags-container {
   display: flex;
   flex-wrap: wrap;
+  padding: 10px;
+  background-color: #fafbfc;
+  border-radius: 4px;
 }
+
 .label-tag {
   margin-right: 8px;
   margin-bottom: 8px;
 }
+
 .empty-block {
   padding: 24px;
   text-align: center;
@@ -356,13 +386,64 @@ export default {
   font-size: 14px;
   background-color: #f8f9fa;
   border-radius: 4px;
+  border: 1px dashed #e6e9f0;
 }
+
 .detail-form {
+  padding: 10px 0;
+  
   .el-form-item {
     margin-bottom: 18px;
+    display: flex;
+    align-items: flex-start;
 
     &:last-child {
       margin-bottom: 0;
+    }
+    
+    ::v-deep .el-form-item__label {
+      font-weight: 500;
+      color: #606266;
+      background: #f8fafc;
+      padding: 8px 12px;
+      border-radius: 4px;
+      word-break: break-word;
+      line-height: 1.4;
+      display: inline-block;
+      width: 140px !important;
+      text-align: justify;
+    }
+    
+    ::v-deep .el-form-item__content {
+      padding: 8px 0;
+      margin-left: 150px !important;
+      line-height: 1.5;
+      min-height: 38px;
+      display: flex;
+      align-items: center;
+      
+      span {
+        color: #303133;
+        font-size: 14px;
+      }
+    }
+  }
+}
+
+::v-deep .el-table {
+  margin-top: 8px;
+  border-radius: 4px;
+  overflow: hidden;
+  
+  th {
+    background-color: #f5f7fa !important;
+    color: #606266;
+    font-weight: 500;
+  }
+  
+  .el-table__row {
+    &:hover {
+      background-color: #f5faff;
     }
   }
 }

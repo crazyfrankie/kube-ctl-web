@@ -13,7 +13,7 @@
     <el-table :data="serviceList" style="width: 100%" border v-loading="listLoading" element-loading-text="Loading...">
       <el-table-column prop="name" label="Name" min-width="120">
         <template slot-scope="{row}">
-          <router-link :to="{path:'/network/service-edit', query: {name: row.name, namespace: currentNamespace}}" class="link-type">
+          <router-link :to="{path:'/network/service-detail', query: {name: row.name, namespace: currentNamespace}}" class="link-type">
             <span>{{ row.name }}</span>
           </router-link>
         </template>

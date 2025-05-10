@@ -115,6 +115,13 @@ export const constantRoutes = [
         meta: {title: 'Services', icon: 'service'}
       },
       {
+        path: 'service-detail',
+        name: 'ServiceDetail',
+        component: () => import('@/views/service/detail'),
+        meta: {title: 'Service Details', icon: 'service', activeMenu: "/network/services"},
+        hidden: true
+      },
+      {
         path: 'service-edit',
         name: 'ServiceEdit',
         component: () => import('@/views/service/edit'),
