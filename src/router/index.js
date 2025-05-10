@@ -154,6 +154,33 @@ export const constantRoutes = [
         component: () => import('@/views/ingress/edit'),
         meta: {title: 'Create Ingress', icon: 'ingress', activeMenu: "/network/ingresses"},
         hidden: true
+      },
+      {
+        path: 'ingressroutes',
+        name: 'IngressRoutes',
+        component: () => import('@/views/ingressroute/index'),
+        meta: {title: 'IngressRoutes', icon: 'ingroute'}
+      },
+      {
+        path: 'ingressroute-detail',
+        name: 'IngressRouteDetail',
+        component: () => import('@/views/ingressroute/detail'),
+        meta: {title: 'IngressRoute Details', icon: 'ingroute', activeMenu: "/network/ingressroutes"},
+        hidden: true
+      },
+      {
+        path: 'ingressroute-edit',
+        name: 'IngressRouteEdit',
+        component: () => import('@/views/ingressroute/edit'),
+        meta: {title: 'Edit IngressRoute', icon: 'ingroute', activeMenu: "/network/ingressroutes"},
+        hidden: true
+      },
+      {
+        path: 'ingressroute-create',
+        name: 'IngressRouteCreate',
+        component: () => import('@/views/ingressroute/edit'),
+        meta: {title: 'Create IngressRoute', icon: 'ingroute', activeMenu: "/network/ingressroutes"},
+        hidden: true
       }
     ]
   },
