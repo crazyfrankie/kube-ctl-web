@@ -12,7 +12,7 @@ export function getNodeList(params) {
 // 获取节点详情
 export function getNodeDetail(params) {
   return request({
-    url: '/node/detail',
+    url: '/node',
     method: 'get',
     params
   })

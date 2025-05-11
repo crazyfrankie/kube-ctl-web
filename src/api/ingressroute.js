@@ -20,7 +20,7 @@ export function getIngressRouteList(params) {
  */
 export function getIngressRouteDetail(params) {
   return request({
-    url: '/ingroute/detail',
+    url: '/ingroute',
     method: 'get',
     params
   })

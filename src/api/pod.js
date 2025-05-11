@@ -26,7 +26,7 @@ export function searchPod(params) {
 
 export function getPodDetail(params) {
   return request({
-    url: '/pod/detail',
+    url: '/pod',
     method: 'get',
     params
   })

@@ -14,6 +14,7 @@ import storageclass from './modules/storageclass'
 import service from './modules/service'
 import ingress from './modules/ingress'
 import ingressroute from './modules/ingressroute'
+import deployment from './modules/deployment'
 
 Vue.use(Vuex)
 
@@ -31,7 +32,8 @@ const store = new Vuex.Store({
     storageclass,
     service,
     ingress,
-    ingressroute
+    ingressroute,
+    deployment
   },
   getters
 })

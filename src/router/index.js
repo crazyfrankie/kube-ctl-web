@@ -69,6 +69,36 @@ export const constantRoutes = [
     ]
   },
   {
+    path: '/workload',
+    component: Layout,
+    redirect: '/workload/deployments',
+    name: 'WorkLoad',
+    meta: {title: 'WorkLoad Management', icon: 'workload'},
+    alwaysShow: true, // Always show the root menu
+    children: [
+      {
+        path: 'deployments',
+        name: 'Deployments',
+        component: () => import('@/views/deployment/index'),
+        meta: {title: 'Deployments', icon: 'deployment'}
+      },
+      {
+        path: 'deployment-edit',
+        name: 'DeploymentEdit',
+        component: () => import('@/views/deployment/edit'),
+        meta: {title: 'Edit Deployment', icon: 'deployment', activeMenu: "/workload/deployments"},
+        hidden: true
+      },
+      {
+        path: 'deployment-create',
+        name: 'DeploymentCreate',
+        component: () => import('@/views/deployment/edit'),
+        meta: {title: 'Create Deployment', icon: 'deployment', activeMenu: "/workload/deployments"},
+        hidden: true
+      }
+    ]
+  },
+  {
     path: '/pod',
     component: Layout,
     redirect: '/pod/list',

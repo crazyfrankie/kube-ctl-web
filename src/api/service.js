@@ -20,7 +20,7 @@ export function getServiceList(params) {
  */
 export function getServiceDetail(params) {
   return request({
-    url: '/service/detail',
+    url: '/service',
     method: 'get',
     params
   })
