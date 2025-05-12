@@ -95,6 +95,46 @@ export const constantRoutes = [
         component: () => import('@/views/deployment/edit'),
         meta: {title: 'Create Deployment', icon: 'deployment', activeMenu: "/workload/deployments"},
         hidden: true
+      },
+      {
+        path: 'daemonsets',
+        name: 'DaemonSets',
+        component: () => import('@/views/daemonset/index'),
+        meta: {title: 'DaemonSets', icon: 'daemonset'}
+      },
+      {
+        path: 'daemonset-edit',
+        name: 'DaemonSetEdit',
+        component: () => import('@/views/daemonset/edit'),
+        meta: {title: 'Edit DaemonSet', icon: 'daemonset', activeMenu: "/workload/daemonsets"},
+        hidden: true
+      },
+      {
+        path: 'daemonset-create',
+        name: 'DaemonSetCreate',
+        component: () => import('@/views/daemonset/edit'),
+        meta: {title: 'Create DaemonSet', icon: 'daemonset', activeMenu: "/workload/daemonsets"},
+        hidden: true
+      },
+      {
+        path: 'statefulsets',
+        name: 'StatefulSets',
+        component: () => import('@/views/statefulset/index'),
+        meta: {title: 'StatefulSets', icon: 'statefulset'}
+      },
+      {
+        path: 'statefulset-edit',
+        name: 'StatefulSetEdit',
+        component: () => import('@/views/statefulset/edit'),
+        meta: {title: 'Edit StatefulSet', icon: 'statefulset', activeMenu: "/workload/statefulsets"},
+        hidden: true
+      },
+      {
+        path: 'statefulset-create',
+        name: 'StatefulSetCreate',
+        component: () => import('@/views/statefulset/edit'),
+        meta: {title: 'Create StatefulSet', icon: 'statefulset', activeMenu: "/workload/statefulsets"},
+        hidden: true
       }
     ]
   },
