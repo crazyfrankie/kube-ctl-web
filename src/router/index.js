@@ -135,6 +135,46 @@ export const constantRoutes = [
         component: () => import('@/views/statefulset/edit'),
         meta: {title: 'Create StatefulSet', icon: 'statefulset', activeMenu: "/workload/statefulsets"},
         hidden: true
+      },
+      {
+        path: 'jobs',
+        name: 'Jobs',
+        component: () => import('@/views/job/index'),
+        meta: {title: 'Jobs', icon: 'job'}
+      },
+      {
+        path: 'job-edit',
+        name: 'JobEdit',
+        component: () => import('@/views/job/edit'),
+        meta: {title: 'Edit Job', icon: 'job', activeMenu: "/workload/jobs"},
+        hidden: true
+      },
+      {
+        path: 'job-create',
+        name: 'JobCreate',
+        component: () => import('@/views/job/edit'),
+        meta: {title: 'Create Job', icon: 'job', activeMenu: "/workload/jobs"},
+        hidden: true
+      },
+      {
+        path: 'cronjobs',
+        name: 'CronJobs',
+        component: () => import('@/views/cronjob/index'),
+        meta: {title: 'CronJobs', icon: 'cronjob'}
+      },
+      {
+        path: 'cronjob-edit',
+        name: 'CronJobEdit',
+        component: () => import('@/views/cronjob/edit'),
+        meta: {title: 'Edit CronJob', icon: 'cronjob', activeMenu: "/workload/cronjobs"},
+        hidden: true
+      },
+      {
+        path: 'cronjob-create',
+        name: 'CronJobCreate',
+        component: () => import('@/views/cronjob/edit'),
+        meta: {title: 'Create CronJob', icon: 'cronjob', activeMenu: "/workload/cronjobs"},
+        hidden: true
       }
     ]
   },
