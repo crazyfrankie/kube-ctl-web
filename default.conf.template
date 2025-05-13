@@ -19,7 +19,7 @@ server {
         root   /usr/share/nginx/html;
     }
 
-    location /prod-api/ {
+    location /api/ {
         proxy_pass  ${BACKEND_HOST};
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
