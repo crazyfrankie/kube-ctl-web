@@ -368,6 +368,82 @@ export const constantRoutes = [
       },
     ]
   },
+  {
+    path: '/authority',
+    component: Layout,
+    redirect: '/authority/roles',
+    name: 'Authority',
+    meta: {title: 'RBAC Management', icon: 'user'},
+    children: [
+      {
+        path: 'roles',
+        name: 'Roles',
+        component: () => import('@/views/role/index'),
+        meta: {title: 'Roles', icon: 'user'}
+      },
+      {
+        path: 'role-detail',
+        name: 'RoleDetail',
+        component: () => import('@/views/role/detail'),
+        meta: {title: 'Role Details', icon: 'user', activeMenu: "/authority/roles"},
+        hidden: true
+      },
+      {
+        path: 'role-edit',
+        name: 'RoleEdit',
+        component: () => import('@/views/role/edit'),
+        meta: {title: 'Edit Role', icon: 'user', activeMenu: "/authority/roles"},
+        hidden: true
+      },
+      {
+        path: 'role-create',
+        name: 'RoleCreate',
+        component: () => import('@/views/role/edit'),
+        meta: {title: 'Create Role', icon: 'user', activeMenu: "/authority/roles"},
+        hidden: true
+      },
+      {
+        path: 'rolebindings',
+        name: 'RoleBindings',
+        component: () => import('@/views/rolebinding/index'),
+        meta: {title: 'Role Bindings', icon: 'link'}
+      },
+      {
+        path: 'rolebinding-detail',
+        name: 'RoleBindingDetail',
+        component: () => import('@/views/rolebinding/detail'),
+        meta: {title: 'RoleBinding Details', icon: 'link', activeMenu: "/authority/rolebindings"},
+        hidden: true
+      },
+      {
+        path: 'rolebinding-edit',
+        name: 'RoleBindingEdit',
+        component: () => import('@/views/rolebinding/edit'),
+        meta: {title: 'Edit RoleBinding', icon: 'link', activeMenu: "/authority/rolebindings"},
+        hidden: true
+      },
+      {
+        path: 'rolebinding-create',
+        name: 'RoleBindingCreate',
+        component: () => import('@/views/rolebinding/edit'),
+        meta: {title: 'Create RoleBinding', icon: 'link', activeMenu: "/authority/rolebindings"},
+        hidden: true
+      },
+      {
+        path: 'serviceaccounts',
+        name: 'ServiceAccounts',
+        component: () => import('@/views/serviceaccount/index'),
+        meta: {title: 'Service Accounts', icon: 'user'}
+      },
+      {
+        path: 'serviceaccount-create',
+        name: 'ServiceAccountCreate',
+        component: () => import('@/views/serviceaccount/create'),
+        meta: {title: 'Create ServiceAccount', icon: 'user', activeMenu: "/authority/serviceaccounts"},
+        hidden: true
+      }
+    ]
+  },
   // 404 page must be placed at the end !!!
   {path: '*', redirect: '/404', hidden: true}
 ]
