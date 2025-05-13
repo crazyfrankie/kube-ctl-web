@@ -2,20 +2,9 @@ kind: pipeline
 type: docker
 name: kube-ctl-web-publish
 
-environment:
-  GOOS: linux
-  GOARCH: amd64
-
 steps:
-  - name: build
+  - name: build and push to harbor
     image: plugins/docker:20.14.2
-    volumes:
-      - name: hosts
-        path: /etc/hosts
-      - name: docker-ca
-        path: /etc/docker
-      - name: dockersock
-        path: /var/run/docker.sock
     settings:
       username: admin
       password:
@@ -24,27 +13,20 @@ steps:
       registry: harbor.cfckube.com
       tags:
         - v1.0
+    extra_hosts:
+      - "harbor.cfckube.com:172.20.2.17"
+
   - name: deploy via ssh
     image: appleboy/drone-ssh:1.6.13
     settings:
-      host: 172.20.2.17
-      username: frank  # Windows 上配置的可 ssh 用户
+      host: 172.20.2.17           # Windows 主机地址
+      username: frank             # Windows 中已开启 SSH 的用户名
       password:
         from_secret: ssh_password
-      port: 22
+      port: 22                    # 默认 SSH 端口，确保 Windows 已开放
       script:
-        - if [ $(docker ps -a | grep kube-ctl-web | wc -l) -ge 1 ];then docker stop kube-ctl-web && docker rm kube-ctl-web; fi
+        - if [ $(docker ps -a | grep kube-ctl-web | wc -l) -ge 1 ]; then docker stop kube-ctl-web && docker rm kube-ctl-web; fi
         - docker pull harbor.cfckube.com/kubefrank/kube-ctl-web:v1.0
         - export BACKEND_HOST=http://172.20.2.17:8083/
         - docker run --name kube-ctl-web --restart=always -d -p 8081:80 -e BACKEND_HOST=$BACKEND_HOST harbor.cfckube.com/kubefrank/kube-ctl-web:v1.0
-volumes:
-  - name: hosts
-    host:
-      path: /etc/hosts
-  - name: docker-ca
-    host:
-      path: /etc/docker
-  - name: dockersock
-    host:
-      path: /var/run/docker.sock
 
