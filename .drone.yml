@@ -24,26 +24,22 @@ steps:
       registry: harbor.cfckube.com
       tags:
         - v1.0
-  - name: ssh commands
+
+  - name: deploy via ssh
     image: appleboy/drone-ssh:1.6.13
     settings:
       host: 172.20.2.17
-      username: root
+      username: frank  # Windows 上配置的可 ssh 用户
       password:
         from_secret: ssh_password
       port: 22
       script:
-        - if [ $(docker ps -a | grep kube-ctl-web | wc -l) -ge 1 ];then docker stop kube-ctl-web && docker rm kube-ctl-web; fi
+        - docker stop kube-ctl-web || true
+        - docker rm kube-ctl-web || true
         - docker pull harbor.cfckube.com/kubefrank/kube-ctl-web:v1.0
-        - export BACKEND_HOST=http://172.20.2.17:8083/
-        - docker run --name kube-ctl-web --restart=always -d -p 8081:80 -e BACKEND_HOST=$BACKEND_HOST harbor.cfckube.com/kubefrank/kube-ctl-web:v1.0
+        - docker run --name kube-ctl-web --restart=always -d -p 8081:80 -e BACKEND_HOST=http://172.20.2.17:8083/ harbor.cfckube.com/kubefrank/kube-ctl-web:v1.0
+
 volumes:
-  - name: hosts
-    host:
-      path: /etc/hosts
-  - name: docker-ca
-    host:
-      path: /etc/docker
-  - name: dockersock
+  - name: docker-sock
     host:
       path: /var/run/docker.sock
