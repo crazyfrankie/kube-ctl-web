@@ -1,35 +1,56 @@
 <template>
   <div class="dashboard-container">
+    <div class="dashboard-header">
+      <h1 class="dashboard-title">Kubernetes Cluster Overview</h1>
+      <el-tooltip content="Refresh Dashboard" placement="top">
+        <el-button 
+          type="primary" 
+          icon="el-icon-refresh" 
+          circle 
+          class="global-refresh-btn" 
+          :loading="manualRefreshing"
+          @click="handleManualRefresh">
+        </el-button>
+      </el-tooltip>
+    </div>
     <div v-loading="loading" element-loading-text="Loading dashboard data...">
     <!-- Cluster Information Section -->
-    <el-row :gutter="20">
+    <el-row :gutter="24">
       <el-col :span="6" v-for="(item, index) in clusterInfo" :key="'cluster'+index">
-        <el-card shadow="hover" class="dashboard-card">
-          <div class="card-header">
-            <svg-icon :icon-class="getIconForCluster(item.title)" class-name="card-icon" />
-            <span class="card-title">{{ item.title }}</span>
+        <el-card shadow="always" class="dashboard-card cluster-card">
+          <div class="card-content">
+            <div class="icon-wrapper">
+              <svg-icon :icon-class="getIconForCluster(item.title)" class-name="cluster-icon" />
+            </div>
+            <div class="info-wrapper">
+              <div class="card-title">{{ item.title }}</div>
+              <div class="card-value">{{ item.value }}</div>
+              <div class="card-label" v-if="item.label">{{ item.label }}</div>
+            </div>
           </div>
-          <div class="card-value" :style="{'color': `rgba(${item.color}1)`}">{{ item.value }}</div>
-          <div class="card-label" v-if="item.label">{{ item.label }}</div>
         </el-card>
       </el-col>
     </el-row>
 
     <!-- Resources Information Section -->
-    <el-row :gutter="20" class="resource-section">
+    <el-row :gutter="24" class="resource-section">
       <el-col :span="24">
         <div class="section-header">
           <svg-icon icon-class="workload" class-name="section-icon" />
           <h2>Kubernetes Resources</h2>
         </div>
       </el-col>
-      <el-col :xs="8" :sm="6" :md="4" :lg="3" v-for="(item, index) in resourcesInfo" :key="'resource'+index">
-        <el-card shadow="hover" class="resource-card" :body-style="{ padding: '10px' }" @click.native="showResourceDetail(item)">
-          <div class="resource-header">
-            <svg-icon :icon-class="getIconForResource(item.title)" class-name="resource-icon" />
-            <div class="resource-title">{{ item.title }}</div>
+      <el-col :xs="12" :sm="8" :md="6" :lg="6" v-for="(item, index) in resourcesInfo" :key="'resource'+index">
+        <el-card shadow="always" class="resource-card enhanced" :body-style="{ padding: '0' }" @click.native="showResourceDetail(item)">
+          <div class="resource-content">
+            <div class="resource-icon-wrapper">
+              <svg-icon :icon-class="getIconForResource(item.title)" class-name="resource-icon" />
+            </div>
+            <div class="resource-info">
+              <div class="resource-value">{{ item.value }}</div>
+              <div class="resource-title">{{ item.title }}</div>
+            </div>
           </div>
-          <div class="resource-value" :style="{'color': `rgba(${item.color}1)`}">{{ item.value }}</div>
         </el-card>
       </el-col>
     </el-row>
@@ -66,6 +87,17 @@
         <div class="section-header">
           <svg-icon icon-class="form" class-name="section-icon" />
           <h2>Resource Usage Trends</h2>
+          <el-tooltip content="手动刷新数据" placement="top">
+            <el-button 
+              type="primary" 
+              icon="el-icon-refresh" 
+              circle 
+              size="mini" 
+              class="refresh-btn" 
+              :loading="manualRefreshing"
+              @click="handleManualRefresh">
+            </el-button>
+          </el-tooltip>
         </div>
       </el-col>
       <el-col :span="12" v-for="(item, index) in usageRangeInfo" :key="'chart'+index">
@@ -128,6 +160,7 @@ export default {
       lastUpdated: Math.floor(Date.now() / 1000),
       dialogVisible: false,
       selectedResource: null,
+      manualRefreshing: false, // 手动刷新状态
       unitOptions: [
         { label: 'x0.01', value: 0.01 },
         { label: 'x0.1', value: 0.1 },
@@ -285,28 +318,56 @@ export default {
         }
       }
     },
-    fetchDashboardData() {
-      this.loading = true
-      this.$store.dispatch('dashboard/getDashboardData').then(() => {
-        this.initCharts()
-        this.loading = false
-        this.lastUpdated = Math.floor(Date.now() / 1000)
-      }).catch(error => {
-        console.error('Failed to fetch dashboard data:', error)
-        this.$message.error('Failed to load dashboard data')
-        this.loading = false
-      })
+    
+    // 手动刷新处理函数
+    handleManualRefresh() {
+      this.manualRefreshing = true
+      this.$store.dispatch('dashboard/getDashboardData')
+        .then(() => {
+          this.initCharts()
+          this.lastUpdated = Math.floor(Date.now() / 1000)
+          this.$message.success('Dashboard refreshed successfully')
+        })
+        .catch(error => {
+          console.error('Failed to refresh dashboard data:', error)
+          this.$message.error('Failed to refresh data')
+        })
+        .finally(() => {
+          this.manualRefreshing = false
+        })
+    },
+    fetchDashboardData(showLoading = false) {
+      if (showLoading) {
+        this.loading = true
+      }
+      
+      return this.$store.dispatch('dashboard/getDashboardData')
+        .then(() => {
+          this.initCharts()
+          this.lastUpdated = Math.floor(Date.now() / 1000)
+          if (showLoading) {
+            this.loading = false
+          }
+        })
+        .catch(error => {
+          console.error('Failed to fetch dashboard data:', error)
+          if (showLoading) {
+            this.$message.error('Failed to load dashboard data')
+            this.loading = false
+          }
+        })
     }
   },
   mounted() {
-    this.fetchDashboardData()
+    // Initial load with loading state
+    this.fetchDashboardData(true)
     
-    // Add resize listener to resize charts
+    // Add resize listener
     window.addEventListener('resize', this.initCharts)
     
-    // Setup auto-refresh every 30 seconds
+    // Set up auto-refresh every 30 seconds (for more responsive updates)
     this.refreshInterval = setInterval(() => {
-      this.fetchDashboardData()
+      this.fetchDashboardData(false) // Silent refresh
     }, 30000)
   },
   beforeDestroy() {
@@ -325,117 +386,237 @@ export default {
 <style lang="scss" scoped>
 .dashboard-container {
   padding: 20px;
+  background-color: #f5f7fa;
+  
+  .dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #dcdfe6;
+    
+    .dashboard-title {
+      margin: 0;
+      font-size: 28px;
+      color: #303133;
+      font-weight: 600;
+    }
+    
+    .global-refresh-btn {
+      font-size: 18px;
+    }
+  }
   
   h2 {
-    font-size: 18px;
-    margin: 15px 0;
-    color: #606266;
+    font-size: 24px;
+    margin: 20px 0;
+    color: #303133;
     display: inline-block;
     vertical-align: middle;
+    font-weight: 600;
   }
   
   .section-header {
     display: flex;
     align-items: center;
-    margin-bottom: 20px;
-    border-bottom: 1px solid #f0f0f0;
-    padding-bottom: 10px;
+    margin-bottom: 30px;
+    border-bottom: 1px solid #ebeef5;
+    padding-bottom: 15px;
     
     .section-icon {
-      font-size: 20px;
-      margin-right: 10px;
+      font-size: 26px;
+      margin-right: 12px;
       color: #409EFF;
     }
   }
   
   .dashboard-card {
-    margin-bottom: 20px;
+    margin-bottom: 30px;
     text-align: center;
-    height: 120px;
+    height: 180px;
     transition: all 0.3s;
+    overflow: hidden;
+    position: relative;
+    border: none;
     
     &:hover {
       transform: translateY(-5px);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
     }
     
-    .card-header {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 10px;
+    &.cluster-card {
+      border-radius: 12px;
       
-      .card-icon {
-        font-size: 16px;
-        margin-right: 5px;
-        color: #409EFF;
+      .card-content {
+        display: flex;
+        height: 100%;
+        padding: 20px;
+        align-items: center;
+        color: #fff;
+        position: relative;
+        z-index: 1;
+        
+        .icon-wrapper {
+          width: 80px;
+          height: 80px;
+          background-color: rgba(255, 255, 255, 0.2);
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin-right: 20px;
+          
+          .cluster-icon {
+            font-size: 40px;
+            color: #fff;
+          }
+        }
+        
+        .info-wrapper {
+          text-align: left;
+          flex-grow: 1;
+          
+          .card-title {
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 12px;
+          }
+          
+          .card-value {
+            font-size: 38px;
+            font-weight: bold;
+            color: #ffffff;
+            margin-bottom: 8px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+          }
+          
+          .card-label {
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.8);
+          }
+        }
       }
       
-      .card-title {
-        font-size: 14px;
-        color: #606266;
+      &:nth-child(1) {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       }
-    }
-    
-    .card-value {
-      font-size: 28px;
-      font-weight: bold;
-      margin-bottom: 5px;
-    }
-    
-    .card-label {
-      font-size: 12px;
-      color: #C0C4CC;
+      &:nth-child(2) {
+        background: linear-gradient(135deg, #2193b0 0%, #6dd5ed 100%);
+      }
+      &:nth-child(3) {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+      }
+      &:nth-child(4) {
+        background: linear-gradient(135deg, #ee0979 0%, #ff6a00 100%);
+      }
     }
   }
   
   .resource-section {
-    margin-top: 30px;
+    margin-top: 40px;
     
     .resource-card {
-      margin-bottom: 20px;
-      text-align: center;
-      height: 100px;
+      margin-bottom: 30px;
       cursor: pointer;
       transition: all 0.3s;
+      border: none;
+      overflow: hidden;
+      border-radius: 12px;
+      background-color: #fff;  /* Add default background */
       
-      &:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-      }
-      
-      .resource-header {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        margin-bottom: 10px;
+      &.enhanced {
+        height: 140px;
         
-        .resource-icon {
-          font-size: 18px;
-          margin-bottom: 5px;
-          color: #409EFF;
+        .resource-content {
+          display: flex;
+          align-items: center;
+          padding: 20px;
+          height: 100%;
+          color: #fff;
+          position: relative;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); /* Default gradient */
+          
+          .resource-icon-wrapper {
+            width: 60px;
+            height: 60px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 20px;
+            
+            .resource-icon {
+              font-size: 30px;
+              color: #fff;
+            }
+          }
+          
+          .resource-info {
+            flex-grow: 1;
+            
+            .resource-value {
+              font-size: 32px;
+              font-weight: bold;
+              margin-bottom: 8px;
+              color: #fff;
+            }
+            
+            .resource-title {
+              font-size: 16px;
+              color: rgba(255, 255, 255, 0.9);
+            }
+          }
+        }
+        
+        // Resource type background colors
+        &:nth-child(6n+2) .resource-content {
+          background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+        }
+        &:nth-child(6n+3) .resource-content {
+          background: linear-gradient(135deg, #E44D26 0%, #F16529 100%);
+        }
+        &:nth-child(6n+4) .resource-content {
+          background: linear-gradient(135deg, #1D976C 0%, #93F9B9 100%);
+        }
+        &:nth-child(6n+5) .resource-content {
+          background: linear-gradient(135deg, #4776E6 0%, #8E54E9 100%);
+        }
+        &:nth-child(6n+6) .resource-content {
+          background: linear-gradient(135deg, #834d9b 0%, #d04ed6 100%);
+        }
+        &:nth-child(6n+7) .resource-content {
+          background: linear-gradient(135deg, #5614B0 0%, #DBD65C 100%);
         }
       }
       
-      .resource-title {
-        font-size: 12px;
-        color: #606266;
-        margin-bottom: 8px;
-      }
-      
-      .resource-value {
-        font-size: 22px;
-        font-weight: bold;
+      &:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
       }
     }
   }
   
   .usage-section {
-    margin-top: 30px;
+    margin-top: 40px;
     
     .usage-card {
-      margin-bottom: 20px;
-      padding: 10px;
+      height: 140px;  /* Fixed height for all usage cards */
+      margin-bottom: 24px;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.05);
+      transition: all 0.3s;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      background-color: #fff;
+      
+      &:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+      }
       
       .usage-header {
         display: flex;
@@ -443,56 +624,86 @@ export default {
         margin-bottom: 15px;
         
         .usage-icon {
-          font-size: 16px;
-          margin-right: 8px;
+          font-size: 24px;
+          margin-right: 10px;
           color: #409EFF;
         }
         
         .usage-title {
-          font-size: 14px;
-          color: #606266;
+          font-size: 16px;
+          color: #303133;
+          font-weight: 500;
         }
       }
       
       .usage-label {
-        font-size: 12px;
+        margin-top: 10px;
         color: #909399;
-        margin-top: 5px;
-        text-align: right;
+        font-size: 14px;
       }
     }
   }
   
   .chart-section {
-    margin-top: 30px;
+    margin-top: 40px;
     
     .chart-card {
-      margin-bottom: 20px;
+      margin-bottom: 24px;
+      border-radius: 8px;
+      box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.05);
+      transition: all 0.3s;
+      
+      &:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+      }
       
       .chart-container {
-        height: 300px;
+        height: 320px;
+        padding: 10px;
       }
       
       .chart-header {
         display: flex;
         align-items: center;
+        height: 56px;
+        padding: 0 15px;
+        background-color: #f7f9fc;
+        border-bottom: 1px solid #ebeef5;
         
         .chart-icon {
-          font-size: 16px;
-          margin-right: 8px;
+          font-size: 20px;
+          margin-right: 10px;
           color: #409EFF;
+          background-color: #ecf5ff;
+          border-radius: 50%;
+          width: 36px;
+          height: 36px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        
+        span:not(.unit-selector):not(.last-updated) {
+          font-size: 16px;
+          font-weight: 500;
+          color: #303133;
         }
         
         .unit-selector {
-          margin-left: 10px;
+          margin-left: 15px;
         }
         
         .last-updated {
           margin-left: auto;
-          font-size: 12px;
-          color: #909399;
+          font-size: 13px;
+          color: #606266;
         }
       }
+    }
+    
+    .refresh-btn {
+      margin-left: 15px;
     }
   }
 }
