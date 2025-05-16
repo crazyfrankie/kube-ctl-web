@@ -1,90 +1,82 @@
 <template>
   <div class="app-container">
     <div class="filter-container">
-      <el-select
-        v-model="listQuery.namespace"
-        placeholder="Namespace"
-        style="width: 200px"
-        class="filter-item"
-        @change="handleNamespaceChange"
-      >
-        <el-option v-for="item in namespaces" :key="item.name" :label="item.name" :value="item.name" />
+      <el-select v-model="currentNamespace" placeholder="Select namespace" @change="handleNamespaceChange">
+        <el-option
+          v-for="item in namespaces"
+          :key="item.name"
+          :label="item.name"
+          :value="item.name"
+        />
       </el-select>
       <el-input
-        v-model="listQuery.keyword"
-        placeholder="Search Ingress"
-        style="width: 200px"
+        v-model="keyword"
+        placeholder="Search Ingresses"
+        style="width: 200px;"
         class="filter-item"
-        @keyup.enter.native="handleFilter"
-      />
-      <el-button class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">
-        Search
-      </el-button>
-      <el-button
-        class="filter-item"
-        style="margin-left: 10px"
-        type="primary"
-        icon="el-icon-plus"
-        @click="handleCreate"
+        @keyup.enter.native="handleSearch"
+        clearable
+        @clear="handleSearch"
       >
-        Create
+        <el-button slot="append" icon="el-icon-search" @click="handleSearch"></el-button>
+      </el-input>
+      <el-button class="filter-item" type="primary" icon="el-icon-plus" @click="handleCreate">
+        Create Ingress
       </el-button>
-      <el-button
-        class="filter-item"
-        style="margin-left: 10px"
-        type="success"
-        icon="el-icon-refresh"
-        @click="getList"
-      >
+      <el-button class="filter-item" type="primary" icon="el-icon-refresh" @click="fetchData">
         Refresh
       </el-button>
     </div>
 
-    <el-table
-      v-loading="listLoading"
-      :data="list"
-      element-loading-text="Loading..."
-      border
-      fit
-      highlight-current-row
-      style="width: 100%"
-    >
-      <el-table-column align="center" label="Name" width="220">
-        <template slot-scope="scope">
-          <span>{{ scope.row.name }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column align="center" label="Namespace" width="120">
-        <template slot-scope="scope">
-          <span>{{ scope.row.namespace }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column align="center" label="Hosts">
-        <template slot-scope="scope">
-          <span>{{ scope.row.hosts || '-' }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column align="center" label="Class" width="120">
-        <template slot-scope="scope">
-          <span>{{ scope.row.class || '-' }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column align="center" label="Age" width="120">
-        <template slot-scope="scope">
-          <timestamp :timestamp="scope.row.age" />
-        </template>
-      </el-table-column>
-      <el-table-column align="center" label="Actions" width="200">
-        <template slot-scope="scope">
-          <el-button size="mini" @click="handleEdit(scope.row)">Edit</el-button>
-          <el-button
-            size="mini"
-            type="danger"
-            @click="handleDelete(scope.row)"
-          >Delete</el-button>
-        </template>
-      </el-table-column>
-    </el-table>
+    <el-card class="list-card">
+      <div slot="header">
+        <span>Ingress List</span>
+      </div>
+      <el-table
+        v-loading="listLoading"
+        :data="ingressList"
+        element-loading-text="Loading"
+        border
+        fit
+        highlight-current-row
+      >
+        <el-table-column align="center" label="Name" width="220">
+          <template slot-scope="scope">
+            <span>{{ scope.row.name }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column align="center" label="Namespace" width="120">
+          <template slot-scope="scope">
+            <span>{{ scope.row.namespace }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column align="center" label="Hosts">
+          <template slot-scope="scope">
+            <span>{{ scope.row.hosts || '-' }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column align="center" label="Class" width="120">
+          <template slot-scope="scope">
+            <span>{{ scope.row.class || '-' }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column align="center" label="Age" width="120">
+          <template slot-scope="scope">
+            <timestamp :timestamp="scope.row.age" />
+          </template>
+        </el-table-column>
+        <el-table-column align="center" label="Actions" width="200">
+          <template slot-scope="scope">
+            <el-button size="mini" @click="handleEdit(scope.row)">Edit</el-button>
+            <el-button
+              size="mini"
+              type="danger"
+              @click="handleDelete(scope.row)"
+            >Delete</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+    </el-card>
   </div>
 </template>
 

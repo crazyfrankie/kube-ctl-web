@@ -44,64 +44,68 @@
       </el-button>
     </div>
 
-    <el-table
-      v-loading="listLoading"
-      :data="list"
-      element-loading-text="Loading"
-      border
-      fit
-      highlight-current-row
-      @sort-change="sortChange"
-      style="width: 100%"
-    >
-      <el-table-column label="Name" min-width="180" show-overflow-tooltip>
-        <template slot-scope="scope">
-          <router-link :to="'/workload/deployment-edit?namespace=' + scope.row.namespace + '&name=' + scope.row.name" class="link-type">
-            <span>{{ scope.row.name }}</span>
-          </router-link>
-        </template>
-      </el-table-column>
-      <el-table-column label="Namespace" min-width="120">
-        <template slot-scope="scope">
-          <span>{{ scope.row.namespace }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="Replicas" min-width="100" align="center">
-        <template slot-scope="scope">
-          <span>{{ scope.row.replicas }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="Ready" min-width="80" align="center">
-        <template slot-scope="scope">
-          <span>{{ scope.row.ready }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="Up-to-Date" min-width="120" align="center">
-        <template slot-scope="scope">
-          <span>{{ scope.row.upToDate }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="Available" min-width="120" align="center">
-        <template slot-scope="scope">
-          <span>{{ scope.row.available }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="Age" min-width="100" align="center">
-        <template slot-scope="scope">
-          <span>{{ formatKubeTimestamp(scope.row.age) }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="Actions" fixed="right" min-width="160" align="center">
-        <template slot-scope="{ row }">
-          <el-button type="primary" size="mini" @click="handleUpdate(row)">
-            Edit
-          </el-button>
-          <el-button size="mini" type="danger" @click="handleDelete(row)">
-            Delete
-          </el-button>
-        </template>
-      </el-table-column>
-    </el-table>
+    <el-card class="list-card">
+      <div slot="header">
+        <span>Deployment List</span>
+      </div>
+      <el-table
+        v-loading="listLoading"
+        :data="list"
+        element-loading-text="Loading"
+        border
+        fit
+        highlight-current-row
+        @sort-change="sortChange"
+      >
+        <el-table-column label="Name" min-width="180" show-overflow-tooltip>
+          <template slot-scope="scope">
+            <router-link :to="'/workload/deployment-edit?namespace=' + scope.row.namespace + '&name=' + scope.row.name" class="link-type">
+              <span>{{ scope.row.name }}</span>
+            </router-link>
+          </template>
+        </el-table-column>
+        <el-table-column label="Namespace" min-width="120">
+          <template slot-scope="scope">
+            <span>{{ scope.row.namespace }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="Replicas" min-width="100" align="center">
+          <template slot-scope="scope">
+            <span>{{ scope.row.replicas }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="Ready" min-width="80" align="center">
+          <template slot-scope="scope">
+            <span>{{ scope.row.ready }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="Up-to-Date" min-width="120" align="center">
+          <template slot-scope="scope">
+            <span>{{ scope.row.upToDate }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="Available" min-width="120" align="center">
+          <template slot-scope="scope">
+            <span>{{ scope.row.available }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="Age" min-width="100" align="center">
+          <template slot-scope="scope">
+            <span>{{ formatKubeTimestamp(scope.row.age) }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="Actions" fixed="right" min-width="160" align="center">
+          <template slot-scope="{ row }">
+            <el-button type="primary" size="mini" @click="handleUpdate(row)">
+              Edit
+            </el-button>
+            <el-button size="mini" type="danger" @click="handleDelete(row)">
+              Delete
+            </el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+    </el-card>
   </div>
 </template>
 

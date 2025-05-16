@@ -17,7 +17,7 @@
     <!-- Cluster Information Section -->
     <el-row :gutter="24">
       <el-col :span="6" v-for="(item, index) in clusterInfo" :key="'cluster'+index">
-        <el-card shadow="always" class="dashboard-card cluster-card">
+        <el-card shadow="always" class="dashboard-card cluster-card" :style="getClusterCardStyle(item)">
           <div class="card-content">
             <div class="icon-wrapper">
               <svg-icon :icon-class="getIconForCluster(item.title)" class-name="cluster-icon" />
@@ -42,7 +42,7 @@
       </el-col>
       <el-col :xs="12" :sm="8" :md="6" :lg="6" v-for="(item, index) in resourcesInfo" :key="'resource'+index">
         <el-card shadow="always" class="resource-card enhanced" :body-style="{ padding: '0' }" @click.native="showResourceDetail(item)">
-          <div class="resource-content">
+          <div class="resource-content" :style="getResourceCardStyle(item)">
             <div class="resource-icon-wrapper">
               <svg-icon :icon-class="getIconForResource(item.title)" class-name="resource-icon" />
             </div>
@@ -186,6 +186,22 @@ export default {
       if (percentage < 60) return '#67C23A'
       if (percentage < 80) return '#E6A23C'
       return '#F56C6C'
+    },
+    getClusterCardStyle(item) {
+      if (!item.color) return {}
+      const color = item.color.replace(/,\s*$/, '').split(',')
+      if (color.length < 3) return {}
+      return {
+        background: `linear-gradient(135deg, rgba(${color[0]},${color[1]},${color[2]},1) 0%, rgba(${color[0]},${color[1]},${color[2]},0.8) 100%)`
+      }
+    },
+    getResourceCardStyle(item) {
+      if (!item.color) return {}
+      const color = item.color.replace(/,\s*$/, '').split(',')
+      if (color.length < 3) return {}
+      return {
+        background: `linear-gradient(135deg, rgba(${color[0]},${color[1]},${color[2]},1) 0%, rgba(${color[0]},${color[1]},${color[2]},0.8) 100%)`
+      }
     },
     getIconForCluster(title) {
       const iconMap = {
@@ -497,19 +513,7 @@ export default {
           }
         }
       }
-      
-      &:nth-child(1) {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      }
-      &:nth-child(2) {
-        background: linear-gradient(135deg, #2193b0 0%, #6dd5ed 100%);
-      }
-      &:nth-child(3) {
-        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-      }
-      &:nth-child(4) {
-        background: linear-gradient(135deg, #ee0979 0%, #ff6a00 100%);
-      }
+      // 动态颜色由JavaScript控制
     }
   }
   
@@ -570,25 +574,7 @@ export default {
           }
         }
         
-        // Resource type background colors
-        &:nth-child(6n+2) .resource-content {
-          background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
-        }
-        &:nth-child(6n+3) .resource-content {
-          background: linear-gradient(135deg, #E44D26 0%, #F16529 100%);
-        }
-        &:nth-child(6n+4) .resource-content {
-          background: linear-gradient(135deg, #1D976C 0%, #93F9B9 100%);
-        }
-        &:nth-child(6n+5) .resource-content {
-          background: linear-gradient(135deg, #4776E6 0%, #8E54E9 100%);
-        }
-        &:nth-child(6n+6) .resource-content {
-          background: linear-gradient(135deg, #834d9b 0%, #d04ed6 100%);
-        }
-        &:nth-child(6n+7) .resource-content {
-          background: linear-gradient(135deg, #5614B0 0%, #DBD65C 100%);
-        }
+        // 动态颜色由JavaScript控制
       }
       
       &:hover {

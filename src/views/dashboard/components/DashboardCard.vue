@@ -1,9 +1,9 @@
 <template>
   <div>
-    <div class="top" :style="{background: 'rgb('+data.color+')'}"></div>
-    <div class="dashboard-item" :style="{'background':'rgba('+data.color+',.2)'}">
+    <div class="top" :style="{background: 'rgb('+rgbColor+')'}"></div>
+    <div class="dashboard-item" :style="{'background':'rgba('+rgbColor+',.2)'}">
       <div class="dashboard-card-text">
-        <div class="box title">
+        <div class="box title" :style="{'color':'rgb('+rgbColor+')'}">
           {{ data.value }}
         </div>
         <div class="box desc">
@@ -13,7 +13,7 @@
       <div class="dashboard-card-logo">
         <svg-icon :icon-class="data.logo"
                   :style="{
-           'color':'rgb('+data.color+')',
+           'color':'rgb('+rgbColor+')',
            'margin-bottom':'15px'
                   }"
         />
@@ -30,6 +30,17 @@ export default {
       type: Object
     },
   },
+  computed: {
+    rgbColor() {
+      // 提供默认颜色值，以防 color 未定义
+      const defaultColor = '75,192,192';
+      if (!this.data || !this.data.color) {
+        return defaultColor;
+      }
+      // 移除末尾的逗号（如果存在）并返回颜色值
+      return this.data.color.replace(/,\s*$/, '');
+    }
+  },
   name: "DashboardCard"
 }
 </script>
@@ -38,51 +49,42 @@ export default {
 
 .top {
   width: 100%;
-  height: 10px;
-  background: red;
-  border-top-left-radius: 10px;
-  border-top-right-radius: 10px;
-}
-
-.dashboard-card-text, .dashboard-card-logo {
-  display: inline-block;
-  height: 80px;
-}
-
-.box.title {
-  border-bottom: 3px solid #eee;
-  font-size: 25px;
-  padding-top: 10px;
-  font-weight: 900;
-}
-
-.box.desc {
-  padding-top: 5px;
-}
-
-.dashboard-card-text .box {
-  display: block;
-  /*background: blue;*/
-  height: 50px;
-}
-
-.dashboard-card-text {
-  width: 60%;
-}
-
-.dashboard-card-logo {
-  font-size: 40px;
-  line-height: 0;
-  width: 40%;
-  text-align: right;
-  height: 40px;
+  height: 5px;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
 }
 
 .dashboard-item {
   width: 100%;
-  height: 100%;
-  border-bottom-left-radius: 10px;
-  border-bottom-right-radius: 10px;
-  padding: 0 15px;
+  min-height: 120px;
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+  padding: 16px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.dashboard-card-text {
+  flex: 1;
+}
+
+.box.title {
+  font-size: 28px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.box.desc {
+  font-size: 14px;
+  color: #606266;
+}
+
+.dashboard-card-logo {
+  font-size: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 20px;
 }
 </style>

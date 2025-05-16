@@ -4,13 +4,17 @@
       <el-page-header @back="goBack" :content="isEdit ? 'Edit ConfigMap' : 'Create ConfigMap'" />
     </div>
 
-    <el-card class="box-card" v-loading="loading">
-      <div slot="header" class="clearfix">
-        <span>Basic Information</span>
-      </div>
-      <el-form ref="form" :model="form" :rules="rules" label-width="120px">
+    <el-form ref="mainForm" :model="form" :rules="rules" label-width="120px">
+      <el-card class="box-card" v-loading="loading">
+        <div slot="header" class="clearfix">
+          <span>Basic Information</span>
+          <el-tooltip class="item" effect="dark" content="ConfigMaps allow you to decouple configuration artifacts from image content" placement="top">
+            <i class="el-icon-info" style="margin-left: 8px"></i>
+          </el-tooltip>
+        </div>
+
         <el-form-item label="Namespace" prop="namespace" v-if="!isEdit">
-          <el-select v-model="form.namespace" placeholder="Select namespace">
+          <el-select v-model="form.namespace" placeholder="Select namespace" style="width: 100%">
             <el-option
               v-for="item in namespaces"
               :key="item.name"
@@ -18,53 +22,65 @@
               :value="item.name"
             />
           </el-select>
+          <div class="form-help">Select the namespace where you want to create the ConfigMap</div>
         </el-form-item>
         <el-form-item label="Name" prop="name" v-if="!isEdit">
           <el-input v-model="form.name" placeholder="Enter ConfigMap name"></el-input>
+          <div class="form-help">Name must be unique within the namespace</div>
         </el-form-item>
         <el-form-item label="Labels">
           <el-button size="small" type="primary" @click="addLabel">Add Label</el-button>
+          <div class="form-help">Labels are key/value pairs that can be used to organize and categorize resources</div>
           <div v-for="(label, index) in form.labels" :key="index" style="margin-top: 10px">
-            <el-input v-model="label.key" placeholder="Key" style="width: 200px" />
-            <el-input v-model="label.value" placeholder="Value" style="width: 200px; margin: 0 10px" />
+            <el-input :value="label.key" @input="val => updateLabel(index, 'key', val)" placeholder="Key" style="width: 200px" />
+            <el-input :value="label.value" @input="val => updateLabel(index, 'value', val)" placeholder="Value" style="width: 200px; margin: 0 10px" />
             <el-button type="danger" size="small" @click="removeLabel(index)">Delete</el-button>
           </div>
         </el-form-item>
-      </el-form>
-    </el-card>
-    
-    <el-card class="box-card" style="margin-top: 20px" v-loading="loading">
-      <div slot="header" class="clearfix">
-        <span>Data Configuration</span>
-        <el-button style="float: right" type="primary" size="small" @click="addData">Add Data Item</el-button>
-      </div>
+      </el-card>
       
-      <div v-if="form.data.length === 0" class="empty-block">
-        No data configuration. Please click the "Add Data Item" button to add configuration
-      </div>
-      
-      <div v-for="(item, index) in form.data" :key="index" class="data-item">
-        <el-form-item :label="'Data Item ' + (index + 1)">
-          <el-input v-model="item.key" placeholder="Key" style="width: 200px; margin-right: 10px;" />
-          <el-button type="danger" size="small" @click="removeData(index)">Delete</el-button>
-        </el-form-item>
-        <el-form-item label="Value">
-          <el-input
-            type="textarea"
-            v-model="item.value"
-            placeholder="Value"
-            :rows="5"
-            style="width: 100%"
-          />
-        </el-form-item>
-        <div class="divider-line" v-if="index < form.data.length - 1"></div>
-      </div>
-      
-      <div style="margin-top: 20px; text-align: right;">
-        <el-button type="primary" @click="onSubmit">{{ isEdit ? 'Save' : 'Create' }}</el-button>
-        <el-button @click="goBack">Cancel</el-button>
-      </div>
-    </el-card>
+      <el-card class="box-card" style="margin-top: 20px" v-loading="loading">
+        <div slot="header" class="clearfix">
+          <span>Data Configuration</span>
+          <el-tooltip class="item" effect="dark" content="ConfigMap data is stored as key-value pairs" placement="top">
+            <i class="el-icon-info" style="margin-left: 8px"></i>
+          </el-tooltip>
+          <el-button style="float: right" type="primary" size="small" @click="addData">Add Data Item</el-button>
+        </div>
+        
+        <div v-if="form.data.length === 0" class="empty-block">
+          No data configuration. Click "Add Data Item" to add key-value pairs
+        </div>
+        
+        <div v-for="(item, index) in form.data" :key="index" class="data-item">
+          <el-form-item :label="'Data Item'" :prop="'data.' + index + '.key'" :rules="dataKeyRules">
+            <el-input 
+              v-model="item.key" 
+              placeholder="Key (e.g., config.yaml, app.properties)" 
+              style="width: 300px; margin-right: 10px;"
+              @blur="validateDataKey(item)" 
+            />
+            <el-button type="danger" size="small" @click="removeData(index)">Delete</el-button>
+            <div class="form-help">Key must consist of alphanumeric characters, dots, dashes, or underscores</div>
+          </el-form-item>
+          <el-form-item :label="'Value'" :prop="'data.' + index + '.value'" :rules="dataValueRules">
+            <el-input
+              type="textarea"
+              v-model="item.value"
+              placeholder="Enter configuration data"
+              :rows="5"
+              style="width: 100%; font-family: monospace;"
+            />
+          </el-form-item>
+          <div class="divider-line" v-if="index < form.data.length - 1"></div>
+        </div>
+        
+        <div style="margin-top: 20px; text-align: right;">
+          <el-button type="primary" @click="onSubmit">{{ isEdit ? 'Save' : 'Create' }}</el-button>
+          <el-button @click="goBack">Cancel</el-button>
+        </div>
+      </el-card>
+    </el-form>
   </div>
 </template>
 
@@ -95,7 +111,14 @@ export default {
             trigger: 'blur' 
           }
         ]
-      }
+      },
+      dataKeyRules: [
+        { required: true, message: 'Please enter a key', trigger: 'blur' },
+        { pattern: /^[a-zA-Z0-9.-_]+$/, message: 'Key can only contain letters, numbers, dots, hyphens, and underscores', trigger: 'blur' }
+      ],
+      dataValueRules: [
+        { required: true, message: 'Please enter a value', trigger: 'blur' }
+      ]
     }
   },
   computed: {
@@ -140,12 +163,20 @@ export default {
         })
         const detail = response.data
         
-        // Initialize data
-        this.form.labels = Array.isArray(detail.labels) ? [...detail.labels] : []
+        // Initialize labels
+        this.form.labels = Array.isArray(detail.labels) 
+          ? detail.labels.map(label => ({
+              key: label.key || '',
+              value: label.value || ''
+            }))
+          : []
         
         // Process configmap data
         this.form.data = Array.isArray(detail.data) 
-          ? [...detail.data] 
+          ? detail.data.map(item => ({
+              key: item.key || '',
+              value: item.value || ''
+            }))
           : []
         
       } catch (error) {
@@ -153,6 +184,27 @@ export default {
         Message.error('Failed to get ConfigMap details')
       } finally {
         this.loading = false
+      }
+    },
+    validateDataKey(item) {
+      if (!item.key) return
+      
+      if (!/^[aA-Z0-9.-_]+$/.test(item.key)) {
+        Message.warning('Key can only contain letters, numbers, dots, hyphens, and underscores')
+        item.key = item.key.replace(/[^aA-Z0-9.-_]/g, '')
+      }
+      
+      // Check for duplicate keys
+      const keys = this.form.data.map(d => d.key)
+      const duplicateIndex = keys.indexOf(item.key)
+      if (duplicateIndex !== -1 && duplicateIndex !== this.form.data.indexOf(item)) {
+        Message.warning('Duplicate key detected. Keys must be unique')
+        item.key = ''
+      }
+    },
+    updateLabel(index, field, value) {
+      if (index >= 0 && index < this.form.labels.length) {
+        this.form.labels[index][field] = value
       }
     },
     addLabel() {
@@ -203,7 +255,8 @@ export default {
           name: this.form.name,
           namespace: this.form.namespace,
           labels: this.form.labels.filter(label => label.key && label.value),
-          data: this.form.data.filter(item => item.key && item.value)
+          data: this.form.data.filter(item => item.key && item.value),
+          dataNum: this.form.data.length
         }
         
         try {
@@ -230,25 +283,53 @@ export default {
 .detail-header {
   margin-bottom: 20px;
 }
-.box-card {
-  margin-bottom: 20px;
+
+.form-help {
+  font-size: 12px;
+  color: #909399;
+  margin-top: 4px;
+  line-height: 1.4;
 }
-.data-item {
-  margin-bottom: 10px;
-  padding: 15px;
-  border-radius: 4px;
-}
+
 .divider-line {
-  height: 1px;
-  background-color: #EBEEF5;
+  border-bottom: 1px dashed #e6e6e6;
   margin: 20px 0;
 }
+
 .empty-block {
-  padding: 24px;
   text-align: center;
   color: #909399;
-  font-size: 14px;
-  background-color: #f8f9fa;
+  padding: 30px 0;
+  background: #f8f9fa;
   border-radius: 4px;
+}
+
+.data-item {
+  margin-bottom: 20px;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 4px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.box-card {
+  margin-bottom: 20px;
+  
+  ::v-deep .el-card__header {
+    padding: 15px 20px;
+    border-bottom: 1px solid #ebeef5;
+    
+    .clearfix {
+      display: flex;
+      align-items: center;
+      
+      span {
+        font-weight: 500;
+      }
+    }
+  }
 }
 </style>

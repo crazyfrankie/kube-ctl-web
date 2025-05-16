@@ -1,110 +1,96 @@
 <template>
   <div class="app-container">
     <div class="filter-container">
-      <el-select
-        v-model="listQuery.namespace"
-        placeholder="Namespace"
-        clearable
-        class="filter-item"
-        style="width: 150px"
-        @change="handleNamespaceChange"
-      >
+      <el-select v-model="currentNamespace" placeholder="Select namespace" @change="handleNamespaceChange">
         <el-option
-          v-for="item in namespaceList"
+          v-for="item in namespaces"
           :key="item.name"
           :label="item.name"
           :value="item.name"
         />
       </el-select>
       <el-input
-        v-model="listQuery.keyword"
-        placeholder="Search statefulset name"
-        style="width: 220px; margin-left: 10px;"
+        v-model="keyword"
+        placeholder="Search StatefulSets"
+        style="width: 200px;"
         class="filter-item"
-        @keyup.enter.native="handleFilter"
+        @keyup.enter.native="handleSearch"
+        clearable
+        @clear="handleSearch"
       >
-        <el-button slot="append" icon="el-icon-search" @click="handleFilter"></el-button>
+        <el-button slot="append" icon="el-icon-search" @click="handleSearch"></el-button>
       </el-input>
-      <el-button
-        class="filter-item"
-        style="margin-left: 10px;"
-        type="primary"
-        icon="el-icon-plus"
-        @click="handleCreate"
-      >
-        Create
+      <el-button class="filter-item" type="primary" icon="el-icon-plus" @click="handleCreate">
+        Create StatefulSet
       </el-button>
-      <el-button
-        class="filter-item"
-        style="margin-left: 10px;"
-        type="primary"
-        icon="el-icon-refresh"
-        @click="getList"
-      >
+      <el-button class="filter-item" type="primary" icon="el-icon-refresh" @click="fetchData">
         Refresh
       </el-button>
     </div>
 
-    <el-table
-      v-loading="listLoading"
-      :data="list"
-      element-loading-text="Loading"
-      border
-      fit
-      highlight-current-row
-      @sort-change="sortChange"
-      style="width: 100%"
-    >
-      <el-table-column label="Name" min-width="180" show-overflow-tooltip>
-        <template slot-scope="scope">
-          <router-link :to="'/workload/statefulset-edit?namespace=' + scope.row.namespace + '&name=' + scope.row.name" class="link-type">
-            <span>{{ scope.row.name }}</span>
-          </router-link>
-        </template>
-      </el-table-column>
-      <el-table-column label="Namespace" min-width="120">
-        <template slot-scope="scope">
-          <span>{{ scope.row.namespace }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="Replicas" min-width="100" align="center">
-        <template slot-scope="scope">
-          <span>{{ scope.row.replicas }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="Ready" min-width="80" align="center">
-        <template slot-scope="scope">
-          <span>{{ scope.row.ready }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="Up-to-Date" min-width="120" align="center">
-        <template slot-scope="scope">
-          <span>{{ scope.row.upToDate }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="Available" min-width="120" align="center">
-        <template slot-scope="scope">
-          <span>{{ scope.row.available }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="Age" min-width="100" align="center">
-        <template slot-scope="scope">
-          <span>{{ formatKubeTimestamp(scope.row.age) }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="Actions" fixed="right" min-width="160" align="center">
-        <template slot-scope="{ row }">
-          <el-button type="primary" size="mini" @click="handleUpdate(row)">
-            Edit
-          </el-button>
-          <el-button size="mini" type="danger" @click="handleDelete(row)">
-            Delete
-          </el-button>
-        </template>
-      </el-table-column>
-    </el-table>
+    <el-card class="list-card">
+      <div slot="header">
+        <span>StatefulSet List</span>
+      </div>
+      <el-table
+        v-loading="listLoading"
+        :data="statefulSetList"
+        element-loading-text="Loading"
+        border
+        fit
+        highlight-current-row
+      >
+        <el-table-column label="Name" min-width="180" show-overflow-tooltip>
+          <template slot-scope="scope">
+            <router-link :to="'/workload/statefulset-edit?namespace=' + scope.row.namespace + '&name=' + scope.row.name" class="link-type">
+              <span>{{ scope.row.name }}</span>
+            </router-link>
+          </template>
+        </el-table-column>
+        <el-table-column label="Namespace" min-width="120">
+          <template slot-scope="scope">
+            <span>{{ scope.row.namespace }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="Replicas" min-width="100" align="center">
+          <template slot-scope="scope">
+            <span>{{ scope.row.replicas }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="Ready" min-width="80" align="center">
+          <template slot-scope="scope">
+            <span>{{ scope.row.ready }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="Up-to-Date" min-width="120" align="center">
+          <template slot-scope="scope">
+            <span>{{ scope.row.upToDate }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="Available" min-width="120" align="center">
+          <template slot-scope="scope">
+            <span>{{ scope.row.available }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="Age" min-width="100" align="center">
+          <template slot-scope="scope">
+            <span>{{ formatKubeTimestamp(scope.row.age) }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="Actions" fixed="right" min-width="160" align="center">
+          <template slot-scope="{ row }">
+            <el-button type="primary" size="mini" @click="handleUpdate(row)">
+              Edit
+            </el-button>
+            <el-button size="mini" type="danger" @click="handleDelete(row)">
+              Delete
+            </el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+    </el-card>
 
-    <div v-if="list && list.length === 0 && !listLoading" class="empty-block">
+    <div v-if="statefulSetList && statefulSetList.length === 0 && !listLoading" class="empty-block">
       No StatefulSets in this namespace
     </div>
   </div>
@@ -305,5 +291,8 @@ export default {
   background-color: #f8f9fa;
   border-radius: 4px;
   margin-top: 15px;
+}
+.list-card {
+  margin-top: 20px;
 }
 </style>

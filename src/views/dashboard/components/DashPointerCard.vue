@@ -1,6 +1,7 @@
 <template>
-  <div class="box" :style="{height:'200px',background:getColor(data.value),width:'100%'}" ref="chart"></div>
+  <div class="box" :style="{height:'200px',width:'100%'}" ref="chart"></div>
 </template>
+
 <script>
 import resize from './mixins/resize'
 
@@ -12,11 +13,22 @@ export default {
       type: Object,
     }
   },
+  computed: {
+    chartColor() {
+      // 提供默认颜色，使用相同的 rgb 格式
+      const defaultColor = '103,194,58'; // #67C23A 的 RGB 值
+      if (!this.data || !this.data.color) {
+        return `rgb(${defaultColor})`;
+      }
+      // 移除末尾的逗号（如果存在）
+      const color = this.data.color.replace(/,\s*$/, '');
+      return `rgb(${color})`;
+    }
+  },
   data() {
     return {
       timer: "",
       chart: null,
-      // 配置可视化图形
       option: {
         series: [
           {
@@ -34,30 +46,12 @@ export default {
               width: 20
             },
             itemStyle: {
-              // color: 'red'
-              normal: {
-                color: function (params) {
-                  // alert(params.value)
-                  if (params.value > 0 && params.value < 50) {
-                    return "#67C23A";
-                  } else if (params.value >= 50 && params.value <= 80) {
-                    return "#E6A23C";
-                  } else {
-                    return "#F56C6C";
-                  }
-
-                }
-              }
+              color: params => this.chartColor
             },
             axisLine: {
               lineStyle: {
                 width: 10,
-                // color:"red",
-                color: [
-                  [100, "#eee"],
-                  // [70, '#37a2da'],
-                  // [100, '#fd666d']
-                ]
+                color: [[100, "#eee"]]
               }
             },
             pointer: {
@@ -93,68 +87,34 @@ export default {
               },
               color: 'inherit'
             },
-            grid: {
-              x: 0,
-              y: 0,
-              x2: 0,
-              y2: 0,
-              left: 0,
-              right: 0,
-              top: 0,
-              bottom: 0
-            },
-            data: [
-              {
-                value: 0.7,
-                name: 'Grade Rating'
-              }
-            ]
+            data: [{
+              value: 0.7,
+              name: 'Grade Rating'
+            }]
           }
         ]
-      },
+      }
     }
   },
   mounted() {
     this.getPage()
-    // this.timer = setInterval(() => {
-    //   if (this.chart) {
-    //     // this.chart.style.width = "458px"
-    //     this.chart.resize({
-    //       width: "458px",
-    //       height: "200px"
-    //     });
-    //   }
-    // }, 1000)
   },
   methods: {
-    getColor(value) {
-      if (value < 50) {
-        return "#F2F6FC"
-      }
-      if (value < 80) {
-        return "#F2F6FC"
-      }
-      return "#F2F6FC"
-    },
     getPage() {
-      // 引用chart并初始化
       this.option.series[0].data[0].name = this.data.title
       this.option.series[0].data[0].value = this.data.value
-      // console.log(this.$refs.chart.offsetWidth)
       this.chart = this.$echarts.init(this.$refs.chart);
-      // 使用刚指定的配置项和数据显示图表。
       this.chart.setOption(this.option);
     },
     beforeDestroy() {
-      /* 页面组件销毁的时候，别忘了移除绑定的监听resize事件，否则的话，多渲染几次
-      容易导致内存泄漏和额外CPU或GPU占用哦*/
       window.removeEventListener("resize", () => {
         this.chart.resize();
       });
-    },
+    }
   }
 }
 </script>
+
 <style scoped>
 .box {
   border-radius: 5px;

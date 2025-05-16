@@ -10,59 +10,67 @@
         />
       </el-select>
       <el-input
-        v-model="searchPodName"
-        placeholder="Search Pod"
-        style="width: 200px; margin-left: 10px"
+        v-model="keyword"
+        placeholder="Search Pods"
+        style="width: 200px;"
         class="filter-item"
         @keyup.enter.native="handleSearch"
         clearable
-        @clear="handleSearchClear"
+        @clear="handleSearch"
       >
         <el-button slot="append" icon="el-icon-search" @click="handleSearch"></el-button>
       </el-input>
-      <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-plus" @click="handleCreate">
+      <el-button class="filter-item" type="primary" icon="el-icon-plus" @click="handleCreate">
         Create Pod
+      </el-button>
+      <el-button class="filter-item" type="primary" icon="el-icon-refresh" @click="fetchData">
+        Refresh
       </el-button>
     </div>
 
-    <el-table
-      v-loading="listLoading"
-      :data="podList"
-      element-loading-text="Loading"
-      border
-      fit
-      highlight-current-row
-    >
-      <el-table-column label="Name" prop="name">
-        <template slot-scope="{row}">
-          <router-link :to="{ path: '/pod/detail', query: { namespace: currentNamespace, name: row.name }}">
-            {{ row.name }}
-          </router-link>
-        </template>
-      </el-table-column>
-      <el-table-column label="Ready" prop="ready" />
-      <el-table-column label="Status" prop="status">
-        <template slot-scope="{row}">
-          <el-tag :type="getStatusType(row.status)" size="medium">
-            {{ row.status }}
-          </el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column label="Restarts" prop="restarts" />
-      <el-table-column label="IP Address" prop="ip" />
-      <el-table-column label="Node" prop="node" />
-      <el-table-column label="Age">
-        <template slot-scope="{row}">
-          <timestamp :data="row.age" />
-        </template>
-      </el-table-column>
-      <el-table-column label="Actions" width="200">
-        <template slot-scope="{row}">
-          <el-button type="text" @click="handleEdit(row)">Edit</el-button>
-          <el-button type="text" @click="handleDelete(row)">Delete</el-button>
-        </template>
-      </el-table-column>
-    </el-table>
+    <el-card class="list-card">
+      <div slot="header">
+        <span>Pod List</span>
+      </div>
+      <el-table
+        v-loading="listLoading"
+        :data="podList"
+        element-loading-text="Loading"
+        border
+        fit
+        highlight-current-row
+      >
+        <el-table-column label="Name" prop="name">
+          <template slot-scope="{row}">
+            <router-link :to="{ path: '/pod/detail', query: { namespace: currentNamespace, name: row.name }}">
+              {{ row.name }}
+            </router-link>
+          </template>
+        </el-table-column>
+        <el-table-column label="Ready" prop="ready" />
+        <el-table-column label="Status" prop="status">
+          <template slot-scope="{row}">
+            <el-tag :type="getStatusType(row.status)" size="medium">
+              {{ row.status }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="Restarts" prop="restarts" />
+        <el-table-column label="IP Address" prop="ip" />
+        <el-table-column label="Node" prop="node" />
+        <el-table-column label="Age">
+          <template slot-scope="{row}">
+            <timestamp :data="row.age" />
+          </template>
+        </el-table-column>
+        <el-table-column label="Actions" width="200">
+          <template slot-scope="{row}">
+            <el-button type="text" @click="handleEdit(row)">Edit</el-button>
+            <el-button type="text" @click="handleDelete(row)">Delete</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+    </el-card>
   </div>
 </template>
 
@@ -80,7 +88,7 @@ export default {
   data() {
     return {
       currentNamespace: '',
-      searchPodName: '',
+      keyword: '',
       podList: [],
       listLoading: false
     }
@@ -135,14 +143,14 @@ export default {
       }
     },
     async handleSearch() {
-      if (!this.searchPodName.trim()) {
+      if (!this.keyword.trim()) {
         return this.getPodList()
       }
       this.listLoading = true
       try {
         const response = await this.$store.dispatch('pod/searchPod', {
           namespace: this.currentNamespace,
-          name: this.searchPodName.trim()
+          name: this.keyword.trim()
         })
         if (response.data) {
           this.podList = Array.isArray(response.data) ? response.data : [response.data]
@@ -160,7 +168,7 @@ export default {
       this.getPodList()
     },
     handleNamespaceChange() {
-      this.searchPodName = ''
+      this.keyword = ''
       this.$router.replace({
         query: { namespace: this.currentNamespace }
       })
@@ -272,5 +280,9 @@ export default {
 .el-tag {
   text-align: center;
   width: 100px;
+}
+
+.list-card {
+  margin-top: 20px;
 }
 </style>

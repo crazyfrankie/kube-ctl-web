@@ -3,7 +3,7 @@
     <div class="filter-container">
       <el-input
         v-model="keyword"
-        placeholder="Search nodes"
+        placeholder="Search Nodes"
         style="width: 200px;"
         class="filter-item"
         @keyup.enter.native="handleSearch"
@@ -12,56 +12,61 @@
       >
         <el-button slot="append" icon="el-icon-search" @click="handleSearch"></el-button>
       </el-input>
-      <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-refresh" @click="fetchData">
+      <el-button class="filter-item" type="primary" icon="el-icon-refresh" @click="fetchData">
         Refresh
       </el-button>
     </div>
-    
-    <el-table
-      v-loading="listLoading"
-      :data="nodeList"
-      element-loading-text="Loading"
-      border
-      fit
-      highlight-current-row
-    >
-      <el-table-column label="Name" min-width="180">
-        <template slot-scope="{row}">
-          <router-link :to="{ path: '/node/edit', query: { name: row.name }}" class="link-type">
-            {{ row.name }}
-          </router-link>
-        </template>
-      </el-table-column>
-      <el-table-column label="Status" prop="status" width="100">
-        <template slot-scope="{row}">
-          <el-tag :type="getStatusType(row.status)">{{ row.status }}</el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column label="Kubernetes Version" prop="version" min-width="120" />
-      <el-table-column label="Internal IP" prop="internalIP" min-width="120" />
-      <el-table-column label="External IP" prop="externalIP" min-width="120">
-        <template slot-scope="{row}">
-          {{ row.externalIP || '-' }}
-        </template>
-      </el-table-column>
-      <el-table-column label="OS Image" min-width="180">
-        <template slot-scope="{row}">
-          <span>{{ row.OSImage }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="Container Runtime" prop="containerRuntime" min-width="120" />
-      <el-table-column label="Created">
-        <template slot-scope="{row}">
-          <span>{{ formatTime(row.age) }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="Actions" width="160" fixed="right">
-        <template slot-scope="{row}">
-          <el-button type="text" @click="handleEdit(row)">Edit</el-button>
-          <el-button type="text" @click="viewPods(row)">View Pods</el-button>
-        </template>
-      </el-table-column>
-    </el-table>
+
+    <el-card class="list-card">
+      <div slot="header">
+        <span>Node List</span>
+      </div>
+      <el-table
+        v-loading="listLoading"
+        :data="nodeList"
+        element-loading-text="Loading"
+        border
+        fit
+        highlight-current-row
+      >
+        <el-table-column label="Name" min-width="180">
+          <template slot-scope="{row}">
+            <router-link :to="{ path: '/node/edit', query: { name: row.name }}" class="link-type">
+              {{ row.name }}
+            </router-link>
+          </template>
+        </el-table-column>
+        <el-table-column label="Status" prop="status" width="100">
+          <template slot-scope="{row}">
+            <el-tag :type="getStatusType(row.status)">{{ row.status }}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="Kubernetes Version" prop="version" min-width="120" />
+        <el-table-column label="Internal IP" prop="internalIP" min-width="120" />
+        <el-table-column label="External IP" prop="externalIP" min-width="120">
+          <template slot-scope="{row}">
+            {{ row.externalIP || '-' }}
+          </template>
+        </el-table-column>
+        <el-table-column label="OS Image" min-width="180">
+          <template slot-scope="{row}">
+            <span>{{ row.OSImage }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="Container Runtime" prop="containerRuntime" min-width="120" />
+        <el-table-column label="Created">
+          <template slot-scope="{row}">
+            <span>{{ formatTime(row.age) }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="Actions" width="160" fixed="right">
+          <template slot-scope="{row}">
+            <el-button type="text" @click="handleEdit(row)">Edit</el-button>
+            <el-button type="text" @click="viewPods(row)">View Pods</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+    </el-card>
 
     <!-- Node Pod list dialog -->
     <el-dialog :title="`Pods on Node '${currentNodeName}'`" :visible.sync="podsDialogVisible" width="80%">

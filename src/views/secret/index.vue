@@ -9,44 +9,60 @@
           :value="item.name"
         />
       </el-select>
-      <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-plus" @click="handleCreate">
+      <el-input
+        v-model="keyword"
+        placeholder="Search Secrets"
+        style="width: 200px;"
+        class="filter-item"
+        @keyup.enter.native="handleSearch"
+        clearable
+        @clear="handleSearch"
+      >
+        <el-button slot="append" icon="el-icon-search" @click="handleSearch"></el-button>
+      </el-input>
+      <el-button class="filter-item" type="primary" icon="el-icon-plus" @click="handleCreate">
         Create Secret
       </el-button>
-      <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-refresh" @click="fetchData">
+      <el-button class="filter-item" type="primary" icon="el-icon-refresh" @click="fetchData">
         Refresh
       </el-button>
     </div>
 
-    <el-table
-      v-loading="listLoading"
-      :data="secretList"
-      element-loading-text="Loading"
-      border
-      fit
-      highlight-current-row
-    >
-      <el-table-column label="Name" prop="name">
-        <template slot-scope="{row}">
-          <router-link :to="{ path: '/volume/secret-edit', query: { namespace: currentNamespace, name: row.name }}">
-            {{ row.name }}
-          </router-link>
-        </template>
-      </el-table-column>
-      <el-table-column label="Namespace" prop="namespace" />
-      <el-table-column label="Type" prop="type" />
-      <el-table-column label="Data Count" prop="dataCount" />
-      <el-table-column label="Created">
-        <template slot-scope="{row}">
-          <span>{{ formatKubeTimestamp(row.age) }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="Actions" width="200">
-        <template slot-scope="{row}">
-          <el-button type="text" @click="handleEdit(row)">Edit</el-button>
-          <el-button type="text" @click="handleDelete(row)">Delete</el-button>
-        </template>
-      </el-table-column>
-    </el-table>
+    <el-card class="list-card">
+      <div slot="header">
+        <span>Secret List</span>
+      </div>
+      <el-table
+        v-loading="listLoading"
+        :data="secretList"
+        element-loading-text="Loading"
+        border
+        fit
+        highlight-current-row
+      >
+        <el-table-column label="Name" prop="name">
+          <template slot-scope="{row}">
+            <router-link :to="{ path: '/volume/secret-edit', query: { namespace: currentNamespace, name: row.name }}">
+              {{ row.name }}
+            </router-link>
+          </template>
+        </el-table-column>
+        <el-table-column label="Namespace" prop="namespace" />
+        <el-table-column label="Type" prop="type" />
+        <el-table-column label="Data Count" prop="dataCount" />
+        <el-table-column label="Created">
+          <template slot-scope="{row}">
+            <span>{{ formatKubeTimestamp(row.age) }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="Actions" width="200">
+          <template slot-scope="{row}">
+            <el-button type="text" @click="handleEdit(row)">Edit</el-button>
+            <el-button type="text" @click="handleDelete(row)">Delete</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+    </el-card>
 
     <div v-if="secretList.length === 0 && !listLoading" class="empty-block">
       No secrets in this namespace
@@ -64,7 +80,8 @@ export default {
   data() {
     return {
       currentNamespace: '',
-      listLoading: false
+      listLoading: false,
+      keyword: ''
     }
   },
   computed: {
@@ -148,6 +165,9 @@ export default {
         this.listLoading = false
       }
     },
+    handleSearch() {
+      this.fetchData()
+    },
     formatTime(timestamp) {
       if (!timestamp) return '-'
       
@@ -180,5 +200,8 @@ export default {
   background-color: #f8f9fa;
   border-radius: 4px;
   margin-top: 15px;
+}
+.list-card {
+  margin-top: 20px;
 }
 </style>
