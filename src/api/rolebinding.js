@@ -1,10 +1,6 @@
 import request from '@/utils/request'
 
-/**
- * Get RoleBinding list
- * @param {String} namespace - Namespace to get RoleBindings from
- * @param {String} keyword - Keyword for filtering
- */
+// Get role binding or cluster role binding list 
 export function getRoleBindingList(params) {
   return request({
     url: '/rbac/rb/list',
@@ -13,12 +9,8 @@ export function getRoleBindingList(params) {
   })
 }
 
-/**
- * Get RoleBinding details
- * @param {String} namespace - Namespace of the RoleBinding
- * @param {String} name - RoleBinding name to get details for
- */
-export function getRoleBindingDetail(params) {
+// Get role binding or cluster role binding detail
+export function getRoleBinding(params) {
   return request({
     url: '/rbac/rb',
     method: 'get',
@@ -26,23 +18,16 @@ export function getRoleBindingDetail(params) {
   })
 }
 
-/**
- * Create or update a RoleBinding
- * @param {Object} data - RoleBinding configuration data
- */
+// Create or update role binding or cluster role binding
 export function createOrUpdateRoleBinding(data) {
   return request({
-    url: '/rbac/rb',
+    url: '/rbac/rb', 
     method: 'post',
     data
   })
 }
 
-/**
- * Delete a RoleBinding
- * @param {String} namespace - Namespace of the RoleBinding
- * @param {String} name - RoleBinding name to delete
- */
+// Delete role binding or cluster role binding
 export function deleteRoleBinding(params) {
   return request({
     url: '/rbac/rb',

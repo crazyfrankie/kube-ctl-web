@@ -1,12 +1,12 @@
-import { getRoleList, getRoleDetail, createOrUpdateRole, deleteRole } from '@/api/role'
+import { getRoleList, getRole, createOrUpdateRole, deleteRole } from '@/api/role'
 
 const state = {
   roles: [],
-  currentRole: {}
+  currentRole: null
 }
 
 const mutations = {
-  SET_ROLE_LIST: (state, roles) => {
+  SET_ROLES: (state, roles) => {
     state.roles = roles
   },
   SET_CURRENT_ROLE: (state, role) => {
@@ -15,11 +15,13 @@ const mutations = {
 }
 
 const actions = {
-  // Get Role list
+  // Get role list
   getRoleList({ commit }, params) {
     return new Promise((resolve, reject) => {
       getRoleList(params).then(response => {
-        commit('SET_ROLE_LIST', response.data || [])
+        if (response && response.data) {
+          commit('SET_ROLES', response.data)
+        }
         resolve(response)
       }).catch(error => {
         reject(error)
@@ -27,11 +29,13 @@ const actions = {
     })
   },
 
-  // Get Role details
+  // Get role detail
   getRoleDetail({ commit }, params) {
     return new Promise((resolve, reject) => {
-      getRoleDetail(params).then(response => {
-        commit('SET_CURRENT_ROLE', response.data || {})
+      getRole(params).then(response => {
+        if (response && response.data) {
+          commit('SET_CURRENT_ROLE', response.data)
+        }
         resolve(response)
       }).catch(error => {
         reject(error)
@@ -39,7 +43,7 @@ const actions = {
     })
   },
 
-  // Create or update Role
+  // Create or update role
   createOrUpdateRole({ commit }, data) {
     return new Promise((resolve, reject) => {
       createOrUpdateRole(data).then(response => {
@@ -50,7 +54,7 @@ const actions = {
     })
   },
 
-  // Delete Role
+  // Delete role
   deleteRole({ commit }, params) {
     return new Promise((resolve, reject) => {
       deleteRole(params).then(response => {

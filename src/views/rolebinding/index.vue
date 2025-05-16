@@ -27,7 +27,15 @@
     >
       <el-table-column label="Name" min-width="180" align="center">
         <template slot-scope="{row}">
-          <span class="link-type" @click="handleDetail(row)">{{ row.name }}</span>
+          <router-link
+            :to="{
+              path: `/authority/rolebinding/detail/${row.name}`,
+              query: { namespace: row.namespace }
+            }"
+            class="link-type"
+          >
+            {{ row.name }}
+          </router-link>
         </template>
       </el-table-column>
       
@@ -37,25 +45,13 @@
         </template>
       </el-table-column>
 
-      <el-table-column label="Role Kind" min-width="110" align="center">
-        <template slot-scope="{row}">
-          <el-tag :type="row.roleKind === 'ClusterRole' ? 'danger' : 'primary'">{{ row.roleKind }}</el-tag>
-        </template>
-      </el-table-column>
-
-      <el-table-column label="Role Name" min-width="180" align="center">
-        <template slot-scope="{row}">
-          <span>{{ row.roleName }}</span>
-        </template>
-      </el-table-column>
-      
       <el-table-column label="Age" min-width="100" align="center">
         <template slot-scope="{row}">
           <span>{{ formatKubeTimestamp(row.age) }}</span>
         </template>
       </el-table-column>
 
-      <el-table-column label="Actions" fixed="right" min-width="160" align="center">
+      <el-table-column label="Actions" fixed="right" min-width="230" align="center">
         <template slot-scope="{row}">
           <el-button type="primary" size="mini" @click="handleUpdate(row)">
             Edit
@@ -104,128 +100,90 @@ export default {
       },
       immediate: true
     },
-    // Watch for route changes to handle returning from edit/create
+    // Watch for route changes to handle returning from edit/create and namespace changes
     '$route'(to, from) {
       const toPath = to.path
       const fromPath = from ? from.path : ''
+      const toNamespace = to.query.namespace
+      const fromNamespace = from ? from.query.namespace : ''
       
       if (toPath === '/authority/rolebindings') {
-        // If returning from edit/create page, check if there's a namespace in the query
-        if (from && (fromPath.includes('rolebinding-edit') || fromPath.includes('rolebinding-create'))) {
-          const namespace = to.query.namespace || this.listQuery.namespace
-          if (namespace && namespace !== this.listQuery.namespace) {
-            this.listQuery.namespace = namespace
-            this.getList()
+        if (fromPath.includes('/authority/rolebinding/edit') || fromPath.includes('/authority/rolebinding/create')) {
+          if (toNamespace && toNamespace !== this.listQuery.namespace) {
+            // Update namespace and refresh list when returning with a different namespace
+            this.listQuery.namespace = toNamespace
           }
+          this.getList()
+        } else if (toNamespace && toNamespace !== fromNamespace) {
+          // Handle direct namespace changes through URL
+          this.listQuery.namespace = toNamespace
+          this.getList()
         }
       }
     }
   },
   methods: {
-    async initData() {
-      this.listLoading = true
-      try {
-        await this.getNamespaceList()
-      } catch (error) {
-        console.error('Failed to initialize data:', error)
-        this.$message.error('Failed to initialize data')
-      } finally {
-        this.listLoading = false
-      }
-    },
-    async getNamespaceList() {
-      try {
-        const response = await this.$store.dispatch('pod/getNamespaces')
-        if (response.data && response.data.length > 0) {
-          // If there's a namespace in the URL query params, use it
-          const urlNamespace = this.$route.query.namespace
-          this.listQuery.namespace = urlNamespace || response.data[0].name
-          
-          // Update URL query params to reflect current namespace
-          if (this.listQuery.namespace && this.$route.query.namespace !== this.listQuery.namespace) {
-            this.$router.replace({
-              query: { namespace: this.listQuery.namespace }
-            })
-          }
-          
-          // Explicitly call getList after setting namespace
-          await this.getList()
+    initData() {
+      this.$store.dispatch('pod/getNamespaces').then(() => {
+        // 优先使用URL中的namespace参数
+        const urlNamespace = this.$route.query.namespace
+        if (urlNamespace) {
+          this.listQuery.namespace = urlNamespace
+        } else if (this.namespaces.length > 0) {
+          // 如果URL中没有namespace参数,则使用第一个namespace
+          this.listQuery.namespace = this.namespaces[0].name
         }
-      } catch (error) {
-        console.error('Failed to get namespace list:', error)
-        this.$message.error('Failed to get namespace list')
-        throw error
-      }
+        this.getList()
+      })
     },
-    async getList() {
-      if (!this.listQuery.namespace) return
-      
+    getList() {
       this.listLoading = true
-      try {
-        await this.$store.dispatch('rolebinding/getRoleBindingList', this.listQuery)
-        // List will be updated via the watcher
-      } catch (error) {
-        console.error('Failed to fetch RoleBinding list:', error)
-        this.$message.error('Failed to fetch RoleBinding list')
-      } finally {
+      this.$store.dispatch('rolebinding/getRoleBindingList', this.listQuery).then(() => {
         this.listLoading = false
-      }
+      })
     },
     handleFilter() {
       this.getList()
     },
     handleNamespaceChange() {
+      // 当命名空间改变时,更新URL中的namespace参数
+      this.$router.replace({
+        query: { namespace: this.listQuery.namespace }
+      })
       this.getList()
-      
-      // Update URL query parameters when namespace changes
-      if (this.listQuery.namespace) {
-        this.$router.replace({
-          query: { namespace: this.listQuery.namespace }
-        })
-      }
     },
     handleCreate() {
-      this.$router.push({ 
-        path: '/authority/rolebinding-create',
-        query: { namespace: this.listQuery.namespace } 
+      this.$router.push({
+        path: '/authority/rolebinding/create',
+        query: { namespace: this.listQuery.namespace }
       })
     },
     handleUpdate(row) {
-      this.$router.push({ 
-        path: '/authority/rolebinding-edit', 
-        query: { namespace: row.namespace, name: row.name }
+      this.$router.push({
+        path: `/authority/rolebinding/edit/${row.name}`,
+        query: { namespace: row.namespace }
       })
     },
     handleDetail(row) {
-      this.$router.push({ 
-        path: '/authority/rolebinding-detail', 
-        query: { namespace: row.namespace, name: row.name }
+      this.$router.push({
+        path: `/authority/rolebinding/detail/${row.name}`,
+        query: { namespace: row.namespace }
       })
     },
     handleDelete(row) {
-      this.$confirm('This will permanently delete the RoleBinding. Continue?', 'Warning', {
-        confirmButtonText: 'Confirm',
+      const { name, namespace } = row
+      this.$confirm('This will permanently delete the role binding. Continue?', 'Warning', {
+        confirmButtonText: 'OK',
         cancelButtonText: 'Cancel',
         type: 'warning'
       }).then(() => {
-        this.$store.dispatch('rolebinding/deleteRoleBinding', {
-          namespace: row.namespace,
-          name: row.name
-        }).then(() => {
+        this.$store.dispatch('rolebinding/deleteRoleBinding', { name, namespace }).then(() => {
           this.$message({
             type: 'success',
-            message: 'Delete completed'
+            message: 'Delete successful!'
           })
           this.getList()
-        }).catch(err => {
-          console.error(err)
-          this.$message({
-            type: 'error',
-            message: 'Delete failed'
-          })
         })
-      }).catch(() => {
-        // User canceled, do nothing
       })
     },
     formatKubeTimestamp
@@ -239,13 +197,18 @@ export default {
   display: flex;
   align-items: center;
 }
+
 .filter-item {
   margin-right: 10px;
 }
+
 .link-type {
   color: #409EFF;
   text-decoration: none;
+  font-weight: 500;
+  
   &:hover {
+    color: #66b1ff;
     text-decoration: underline;
   }
 }

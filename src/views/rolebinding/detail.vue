@@ -18,28 +18,22 @@
           <el-form-item label="Namespace">
             <span>{{ roleBindingDetail.namespace || '-' }}</span>
           </el-form-item>
-          <el-form-item label="Created">
-            <span>{{ formatKubeTimestamp(roleBindingDetail.age) }}</span>
+          <el-form-item label="Role Reference">
+            <span>{{ roleBindingDetail.roleRef || '-' }}</span>
           </el-form-item>
-        </el-form>
-      </el-card>
-
-      <!-- Role Reference -->
-      <el-card class="box-card" v-if="hasRoleRef">
-        <div slot="header" class="clearfix">
-          <span>Role Reference</span>
-        </div>
-        <el-form label-width="140px" class="detail-form">
-          <el-form-item label="Kind">
-            <el-tag :type="roleBindingDetail.roleRef.kind === 'ClusterRole' ? 'danger' : 'primary'">
-              {{ roleBindingDetail.roleRef.kind }}
-            </el-tag>
-          </el-form-item>
-          <el-form-item label="Name">
-            <span>{{ roleBindingDetail.roleRef.name || '-' }}</span>
-          </el-form-item>
-          <el-form-item label="API Group">
-            <span>{{ roleBindingDetail.roleRef.apiGroup || '-' }}</span>
+          <el-form-item label="Labels">
+            <template v-if="roleBindingDetail.labels && roleBindingDetail.labels.length">
+              <el-tag
+                v-for="(label, i) in roleBindingDetail.labels"
+                :key="i"
+                type="info"
+                size="small"
+                class="detail-tag"
+              >
+                {{ label.key }}: {{ label.value }}
+              </el-tag>
+            </template>
+            <span v-else>-</span>
           </el-form-item>
         </el-form>
       </el-card>
@@ -50,17 +44,15 @@
           <span>Subjects</span>
         </div>
         <div v-for="(subject, index) in roleBindingDetail.subjects" :key="index" class="subject-block">
-          <div class="subject-header">Subject #{{ index + 1 }}</div>
+          <div class="subject-header">Subject {{ index + 1 }}</div>
           <el-form label-width="140px" class="detail-form">
             <el-form-item label="Kind">
-              <el-tag :type="getSubjectTypeTag(subject.kind)">
-                {{ subject.kind }}
-              </el-tag>
+              <span>{{ subject.kind || '-' }}</span>
             </el-form-item>
             <el-form-item label="Name">
               <span>{{ subject.name || '-' }}</span>
             </el-form-item>
-            <el-form-item v-if="subject.namespace" label="Namespace">
+            <el-form-item label="Namespace" v-if="subject.namespace">
               <span>{{ subject.namespace }}</span>
             </el-form-item>
           </el-form>
@@ -72,80 +64,48 @@
 </template>
 
 <script>
-import { formatKubeTimestamp } from '@/utils'
-
 export default {
   name: 'RoleBindingDetail',
   data() {
     return {
       loading: false,
-      roleBindingDetail: {
-        name: '',
-        namespace: '',
-        age: '',
-        roleRef: {},
-        subjects: []
-      }
+      roleBindingDetail: {},
+      roleBindingName: ''
     }
   },
   computed: {
-    roleBindingName() {
-      return this.roleBindingDetail.name || 'RoleBinding Detail'
-    },
-    hasRoleRef() {
-      return this.roleBindingDetail.roleRef && Object.keys(this.roleBindingDetail.roleRef).length > 0
-    },
     hasSubjects() {
       return this.roleBindingDetail.subjects && this.roleBindingDetail.subjects.length > 0
     }
   },
   created() {
-    this.fetchData()
+    this.roleBindingName = this.$route.params.name
+    this.getRoleBindingDetail()
   },
   methods: {
-    async fetchData() {
-      const { namespace, name } = this.$route.query
-      if (!namespace || !name) {
-        this.$message.error('Invalid parameters')
-        this.goBack()
-        return
-      }
-
+    getRoleBindingDetail() {
+      if (!this.roleBindingName) return
       this.loading = true
-      try {
-        const response = await this.$store.dispatch('rolebinding/getRoleBindingDetail', { namespace, name })
-        if (response && response.data) {
-          this.roleBindingDetail = response.data
-        }
-      } catch (error) {
-        console.error('Failed to get rolebinding details:', error)
-        this.$message.error('Failed to fetch rolebinding details')
-        this.goBack()
-      } finally {
+      this.$store.dispatch('rolebinding/getRoleBindingDetail', {
+        name: this.roleBindingName,
+        namespace: this.$route.query.namespace
+      }).then(() => {
+        this.roleBindingDetail = this.$store.state.rolebinding.currentRoleBinding || {}
         this.loading = false
-      }
-    },
-    getSubjectTypeTag(kind) {
-      const tagTypes = {
-        'User': 'warning',
-        'Group': 'info',
-        'ServiceAccount': 'success'
-      }
-      return tagTypes[kind] || 'primary'
-    },
-    formatKubeTimestamp,
-    goBack() {
-      const { namespace } = this.$route.query
-      this.$router.push({
-        path: '/authority/rolebindings',
-        query: { namespace }
+      }).catch(() => {
+        this.loading = false
       })
     },
     handleEdit() {
-      const { namespace, name } = this.$route.query
       this.$router.push({
-        path: '/authority/rolebinding-edit',
-        query: { namespace, name }
+        path: `/authority/rolebinding/edit/${this.roleBindingName}`,
+        query: { namespace: this.roleBindingDetail.namespace }
+      })
+    },
+    goBack() {
+      this.$router.push({
+        path: '/authority/rolebindings',
+        query: { namespace: this.roleBindingDetail.namespace }
       })
     }
   }
@@ -171,27 +131,103 @@ export default {
   &:last-child {
     margin-bottom: 0;
   }
+  
+  ::v-deep .el-card__header {
+    background: #f8fafc;
+    padding: 15px 20px;
+    font-weight: 600;
+    font-size: 16px;
+    color: #303133;
+    border-bottom: 1px solid #ebeef5;
+  }
+}
+
+.detail-form {
+  padding: 10px 0;
+  
+  .el-form-item {
+    margin-bottom: 18px;
+    display: flex;
+    align-items: flex-start;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+    
+    ::v-deep .el-form-item__label {
+      font-weight: 500;
+      color: #606266;
+      background: #f8fafc;
+      padding: 8px 12px;
+      border-radius: 4px;
+      word-break: break-word;
+      line-height: 1.4;
+      display: inline-block;
+      width: 140px !important;
+      text-align: justify;
+    }
+
+    ::v-deep .el-form-item__content {
+      padding: 8px 0;
+      margin-left: 150px !important;
+      line-height: 1.5;
+      min-height: 38px;
+      display: flex;
+      align-items: center;
+      
+      span {
+        color: #303133;
+        font-size: 14px;
+      }
+    }
+  }
 }
 
 .detail-tag {
   margin-right: 8px;
-  margin-bottom: 5px;
+  margin-bottom: 8px;
+  height: 24px;
+  line-height: 22px;
+  padding: 0 8px;
+  border-radius: 4px;
+  background: #f5f7fa;
+  border: 1px solid #e6e9f0;
+  color: #606266;
+  
+  &:hover {
+    background: #eef1f6;
+  }
 }
 
 .subject-block {
-  margin-bottom: 10px;
-}
-
-.subject-header {
-  font-size: 16px;
-  font-weight: 500;
+  padding: 20px;
+  border: 1px solid #ebeef5;
+  border-radius: 4px;
   margin-bottom: 15px;
-  color: #606266;
+  background: white;
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
+  
+  .subject-header {
+    font-size: 15px;
+    font-weight: 500;
+    color: #303133;
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #ebeef5;
+  }
 }
 
-.detail-form {
-  .el-form-item {
-    margin-bottom: 15px;
+.link-type {
+  color: #409EFF;
+  text-decoration: none;
+  font-weight: 500;
+  
+  &:hover {
+    color: #66b1ff;
+    text-decoration: underline;
   }
 }
 </style>

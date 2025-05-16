@@ -23,6 +23,8 @@ import serviceaccount from './modules/serviceaccount'
 import role from './modules/role'
 import rolebinding from './modules/rolebinding'
 import dashboard from './modules/dashboard'
+import clusterrole from './modules/clusterrole'
+import clusterrolebinding from './modules/clusterrolebinding'
 
 Vue.use(Vuex)
 
@@ -48,8 +50,10 @@ const store = new Vuex.Store({
     cronjob,
     serviceaccount,
     role,
+    clusterrole,
     rolebinding,
-    dashboard
+    dashboard,
+    clusterrolebinding
   },
   getters
 })

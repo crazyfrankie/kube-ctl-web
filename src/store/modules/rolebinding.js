@@ -1,12 +1,12 @@
-import { getRoleBindingList, getRoleBindingDetail, createOrUpdateRoleBinding, deleteRoleBinding } from '@/api/rolebinding'
+import { getRoleBindingList, getRoleBinding, createOrUpdateRoleBinding, deleteRoleBinding } from '@/api/rolebinding'
 
 const state = {
   roleBindings: [],
-  currentRoleBinding: {}
+  currentRoleBinding: null
 }
 
 const mutations = {
-  SET_ROLEBINDING_LIST: (state, roleBindings) => {
+  SET_ROLEBINDINGS: (state, roleBindings) => {
     state.roleBindings = roleBindings
   },
   SET_CURRENT_ROLEBINDING: (state, roleBinding) => {
@@ -15,11 +15,13 @@ const mutations = {
 }
 
 const actions = {
-  // Get RoleBinding list
+  // Get role binding list
   getRoleBindingList({ commit }, params) {
     return new Promise((resolve, reject) => {
       getRoleBindingList(params).then(response => {
-        commit('SET_ROLEBINDING_LIST', response.data || [])
+        if (response && response.data) {
+          commit('SET_ROLEBINDINGS', response.data)
+        }
         resolve(response)
       }).catch(error => {
         reject(error)
@@ -27,11 +29,13 @@ const actions = {
     })
   },
 
-  // Get RoleBinding details
+  // Get role binding detail 
   getRoleBindingDetail({ commit }, params) {
     return new Promise((resolve, reject) => {
-      getRoleBindingDetail(params).then(response => {
-        commit('SET_CURRENT_ROLEBINDING', response.data || {})
+      getRoleBinding(params).then(response => {
+        if (response && response.data) {
+          commit('SET_CURRENT_ROLEBINDING', response.data)
+        }
         resolve(response)
       }).catch(error => {
         reject(error)
@@ -39,7 +43,7 @@ const actions = {
     })
   },
 
-  // Create or update RoleBinding
+  // Create or update role binding
   createOrUpdateRoleBinding({ commit }, data) {
     return new Promise((resolve, reject) => {
       createOrUpdateRoleBinding(data).then(response => {
@@ -50,11 +54,11 @@ const actions = {
     })
   },
 
-  // Delete RoleBinding
+  // Delete role binding  
   deleteRoleBinding({ commit }, params) {
     return new Promise((resolve, reject) => {
       deleteRoleBinding(params).then(response => {
-        resolve(response)
+        resolve(response) 
       }).catch(error => {
         reject(error)
       })
@@ -64,7 +68,7 @@ const actions = {
 
 export default {
   namespaced: true,
-  state,
+  state, 
   mutations,
   actions
 }

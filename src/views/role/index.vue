@@ -43,7 +43,7 @@
         </template>
       </el-table-column>
 
-      <el-table-column label="Actions" fixed="right" min-width="160" align="center">
+      <el-table-column label="Actions" fixed="right" min-width="230" align="center">
         <template slot-scope="{row}">
           <el-button type="primary" size="mini" @click="handleUpdate(row)">
             Edit
@@ -177,13 +177,20 @@ export default {
     handleCreate() {
       this.$router.push({ 
         path: '/authority/role-create',
-        query: { namespace: this.listQuery.namespace } 
+        query: { 
+          namespace: this.listQuery.namespace,
+          previousNamespace: this.listQuery.namespace 
+        }
       })
     },
     handleUpdate(row) {
       this.$router.push({ 
         path: '/authority/role-edit', 
-        query: { namespace: row.namespace, name: row.name }
+        query: { 
+          namespace: row.namespace, 
+          name: row.name,
+          previousNamespace: this.listQuery.namespace 
+        }
       })
     },
     handleDetail(row) {

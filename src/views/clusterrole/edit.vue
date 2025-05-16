@@ -9,17 +9,6 @@
       <el-form-item label="Name" prop="name">
         <el-input v-model="roleForm.name" :disabled="isEdit"/>
       </el-form-item>
-      
-      <el-form-item label="Namespace" prop="namespace" v-if="!isClusterRole">
-        <el-select v-model="roleForm.namespace" placeholder="Please select namespace" :disabled="isEdit">
-          <el-option
-            v-for="item in namespaces"
-            :key="item"
-            :label="item"
-            :value="item">
-          </el-option>
-        </el-select>
-      </el-form-item>
 
       <el-form-item label="Rules" prop="rules">
         <el-table :data="roleForm.rules" border style="width: 100%">
@@ -86,16 +75,9 @@
 
 <script>
 import { getRole, createOrUpdateRole } from '@/api/role'
-import { mapState } from 'vuex'
 
 export default {
-  name: 'RoleEdit',
-  props: {
-    isClusterRole: {
-      type: Boolean,
-      default: false
-    }
-  },
+  name: 'ClusterRoleEdit',
   data() {
     return {
       isEdit: false,
@@ -104,21 +86,15 @@ export default {
         namespace: '',
         rules: []
       },
-      namespaces: [],
-      listLoading: false,
       rules: {
         name: [
           { required: true, message: 'Please input name', trigger: 'blur' },
           { min: 2, max: 64, message: 'Length should be 2 to 64 characters', trigger: 'blur' }
-        ],
-        namespace: [
-          { required: true, message: 'Please select namespace', trigger: 'change' }
         ]
       }
     }
   },
   created() {
-    this.getNamespaceList()
     if (this.$route.query.name) {
       this.isEdit = true
       this.fetchData()
@@ -126,17 +102,14 @@ export default {
   },
   methods: {
     fetchData() {
-      const params = {
-        name: this.$route.query.name
-      }
-      if (!this.isClusterRole) {
-        params.namespace = this.$route.query.namespace
-      }
-      getRole(params).then(response => {
+      getRole({
+        name: this.$route.query.name,
+        namespace: ''
+      }).then(response => {
         const { data } = response
         this.roleForm = {
           name: data.name,
-          namespace: data.namespace,
+          namespace: '',
           rules: data.rules || []
         }
       })
@@ -154,9 +127,9 @@ export default {
     onSubmit() {
       this.$refs.form.validate((valid) => {
         if (valid) {
-          const data = { ...this.roleForm }
-          if (this.isClusterRole) {
-            data.namespace = ''
+          const data = {
+            ...this.roleForm,
+            namespace: ''
           }
           createOrUpdateRole(data).then(() => {
             this.$notify({
@@ -171,34 +144,7 @@ export default {
       })
     },
     onCancel() {
-      const path = this.isClusterRole ? '/authority/clusterroles' : '/authority/roles'
-      const query = {}
-      // Keep the previous namespace when returning
-      const previousNamespace = this.$route.query.previousNamespace
-      if (previousNamespace) {
-        query.namespace = previousNamespace
-      } else if (this.roleForm.namespace) {
-        // If no previous namespace but we have a current one, use that
-        query.namespace = this.roleForm.namespace
-      }
-      this.$router.push({ path, query })
-    },
-    async getNamespaceList() {
-      this.listLoading = true
-      try {
-        const response = await this.$store.dispatch('pod/getNamespaces')
-        this.namespaces = (response.data || []).map(ns => ns.name)
-        
-        // If we're not in edit mode and have namespaces, set the first one as default
-        if (!this.isEdit && this.namespaces.length > 0) {
-          this.roleForm.namespace = this.namespaces[0]
-        }
-      } catch (error) {
-        console.error('Failed to get namespace list:', error)
-        this.$message.error('Failed to get namespace list')
-      } finally {
-        this.listLoading = false
-      }
+      this.$router.push('/authority/clusterroles')
     }
   }
 }

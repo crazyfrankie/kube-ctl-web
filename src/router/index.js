@@ -388,60 +388,6 @@ export const constantRoutes = [
     meta: {title: 'RBAC Management', icon: 'user'},
     children: [
       {
-        path: 'roles',
-        name: 'Roles',
-        component: () => import('@/views/role/index'),
-        meta: {title: 'Roles', icon: 'user'}
-      },
-      {
-        path: 'role-detail',
-        name: 'RoleDetail',
-        component: () => import('@/views/role/detail'),
-        meta: {title: 'Role Details', icon: 'user', activeMenu: "/authority/roles"},
-        hidden: true
-      },
-      {
-        path: 'role-edit',
-        name: 'RoleEdit',
-        component: () => import('@/views/role/edit'),
-        meta: {title: 'Edit Role', icon: 'user', activeMenu: "/authority/roles"},
-        hidden: true
-      },
-      {
-        path: 'role-create',
-        name: 'RoleCreate',
-        component: () => import('@/views/role/edit'),
-        meta: {title: 'Create Role', icon: 'user', activeMenu: "/authority/roles"},
-        hidden: true
-      },
-      {
-        path: 'rolebindings',
-        name: 'RoleBindings',
-        component: () => import('@/views/rolebinding/index'),
-        meta: {title: 'Role Bindings', icon: 'link'}
-      },
-      {
-        path: 'rolebinding-detail',
-        name: 'RoleBindingDetail',
-        component: () => import('@/views/rolebinding/detail'),
-        meta: {title: 'RoleBinding Details', icon: 'link', activeMenu: "/authority/rolebindings"},
-        hidden: true
-      },
-      {
-        path: 'rolebinding-edit',
-        name: 'RoleBindingEdit',
-        component: () => import('@/views/rolebinding/edit'),
-        meta: {title: 'Edit RoleBinding', icon: 'link', activeMenu: "/authority/rolebindings"},
-        hidden: true
-      },
-      {
-        path: 'rolebinding-create',
-        name: 'RoleBindingCreate',
-        component: () => import('@/views/rolebinding/edit'),
-        meta: {title: 'Create RoleBinding', icon: 'link', activeMenu: "/authority/rolebindings"},
-        hidden: true
-      },
-      {
         path: 'serviceaccounts',
         name: 'ServiceAccounts',
         component: () => import('@/views/serviceaccount/index'),
@@ -453,7 +399,125 @@ export const constantRoutes = [
         component: () => import('@/views/serviceaccount/create'),
         meta: {title: 'Create ServiceAccount', icon: 'user', activeMenu: "/authority/serviceaccounts"},
         hidden: true
-      }
+      },
+      {
+        path: 'roles',
+        name: 'Roles',
+        component: () => import('@/views/role/index'),
+        meta: { title: 'Roles', icon: 'user' }
+      },
+      {
+        path: 'role-create',
+        name: 'RoleCreate',
+        component: () => import('@/views/role/edit'),
+        meta: { title: 'Create Role', icon: 'form', activeMenu: '/authority/roles' },
+        hidden: true
+      },
+      {
+        path: 'role-edit',
+        name: 'RoleEdit',
+        component: () => import('@/views/role/edit'),
+        meta: { title: 'Edit Role', icon: 'form', activeMenu: '/authority/roles' },
+        hidden: true
+      },
+      {
+        path: 'role-detail',
+        name: 'RoleDetail',
+        component: () => import('@/views/role/detail'),
+        meta: { title: 'Role Detail', icon: 'form', activeMenu: '/authority/roles' },
+        hidden: true
+      },
+      {
+        path: 'rolebindings',
+        name: 'RoleBindings',
+        component: () => import('@/views/rolebinding/index'),
+        meta: { title: 'Role Bindings', icon: 'user' }
+      },
+      {
+        path: 'rolebinding/create',
+        name: 'RoleBindingCreate',
+        component: () => import('@/views/rolebinding/edit'),
+        meta: { title: 'Create Role Binding', icon: 'form', activeMenu: '/authority/rolebindings' },
+        hidden: true
+      },
+      {
+        path: 'rolebinding/edit/:name',
+        name: 'RoleBindingEdit',
+        component: () => import('@/views/rolebinding/edit'),
+        props: true,
+        meta: { title: 'Edit Role Binding', icon: 'form', activeMenu: '/authority/rolebindings' },
+        hidden: true
+      },
+      {
+        path: 'rolebinding/detail/:name',
+        name: 'RoleBindingDetail',
+        component: () => import('@/views/rolebinding/detail'),
+        props: true,
+        meta: { title: 'Role Binding Detail', icon: 'form', activeMenu: '/authority/rolebindings' },
+        hidden: true
+      },
+      {
+        path: 'clusterroles',
+        name: 'ClusterRoles',
+        component: () => import('@/views/clusterrole/index'),
+        meta: { title: 'Cluster Roles', icon: 'clusterrole' }
+      },
+      {
+        path: 'clusterrole-create',
+        name: 'ClusterRoleCreate',
+        component: () => import('@/views/clusterrole/edit'),
+        meta: { title: 'Create Cluster Role', icon: 'form', activeMenu: '/authority/clusterroles' },
+        hidden: true
+      },
+      {
+        path: 'clusterrole-detail',
+        name: 'ClusterRoleDetail',
+        component: () => import('@/views/clusterrole/detail'),
+        meta: { title: 'Cluster Role Details', icon: 'form', activeMenu: '/authority/clusterroles' },
+        hidden: true
+      },
+      {
+        path: 'clusterrole-edit',
+        name: 'ClusterRoleEdit',
+        component: () => import('@/views/clusterrole/edit'),
+        meta: { title: 'Edit Cluster Role', icon: 'form', activeMenu: '/authority/clusterroles' },
+        hidden: true
+      },
+      {
+        path: 'clusterrole-detail',
+        name: 'ClusterRoleDetail',
+        component: () => import('@/views/clusterrole/detail'),
+        meta: { title: 'Cluster Role Detail', icon: 'form', activeMenu: '/authority/clusterroles' },
+        hidden: true
+      },
+      
+      {
+        path: 'clusterrolebindings',
+        name: 'ClusterRoleBindings', 
+        component: () => import('@/views/clusterrolebinding/index'),
+        meta: { title: 'Cluster Role Bindings', icon: 'clusterrolebinding' }
+      },
+      {
+        path: 'clusterrolebinding-create',
+        name: 'ClusterRoleBindingCreate',
+        component: () => import('@/views/clusterrolebinding/edit'),
+        meta: { title: 'Create Cluster Role Binding', icon: 'form', activeMenu: '/authority/clusterrolebindings' },
+        hidden: true
+      },
+      {
+        path: 'clusterrolebinding-edit/:name',
+        name: 'ClusterRoleBindingEdit',
+        component: () => import('@/views/clusterrolebinding/edit'),
+        meta: { title: 'Edit Cluster Role Binding', icon: 'form', activeMenu: '/authority/clusterrolebindings' },
+        hidden: true
+      },
+      {
+        path: 'clusterrolebinding-detail/:name',
+        name: 'ClusterRoleBindingDetail',
+        component: () => import('@/views/clusterrolebinding/detail'),
+        meta: { title: 'Cluster Role Binding Detail', icon: 'form', activeMenu: '/authority/clusterrolebindings' },
+        hidden: true
+      },
     ]
   },
   // 404 page must be placed at the end !!!

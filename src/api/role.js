@@ -1,10 +1,6 @@
 import request from '@/utils/request'
 
-/**
- * Get Role list
- * @param {String} namespace - Namespace to get Roles from
- * @param {String} keyword - Keyword for filtering
- */
+// Get role or clusterrole list
 export function getRoleList(params) {
   return request({
     url: '/rbac/role/list',
@@ -13,12 +9,8 @@ export function getRoleList(params) {
   })
 }
 
-/**
- * Get Role details
- * @param {String} namespace - Namespace of the Role
- * @param {String} name - Role name to get details for
- */
-export function getRoleDetail(params) {
+// Get role or clusterrole detail
+export function getRole(params) {
   return request({
     url: '/rbac/role',
     method: 'get',
@@ -26,10 +18,7 @@ export function getRoleDetail(params) {
   })
 }
 
-/**
- * Create or update a Role
- * @param {Object} data - Role configuration data
- */
+// Create or update role or clusterrole
 export function createOrUpdateRole(data) {
   return request({
     url: '/rbac/role',
@@ -38,11 +27,7 @@ export function createOrUpdateRole(data) {
   })
 }
 
-/**
- * Delete a Role
- * @param {String} namespace - Namespace of the Role
- * @param {String} name - Role name to delete
- */
+// Delete role or clusterrole
 export function deleteRole(params) {
   return request({
     url: '/rbac/role',
