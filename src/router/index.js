@@ -525,7 +525,7 @@ export const constantRoutes = [
 ]
 
 const createRouter = () => new Router({
-  // mode: 'history', // require service support
+  mode: 'history', // 启用 history 模式，去掉 URL 中的 #
   scrollBehavior: () => ({y: 0}),
   routes: constantRoutes
 })
